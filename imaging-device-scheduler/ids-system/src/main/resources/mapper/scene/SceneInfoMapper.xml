@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.imaging.scheduler.system.mapper.scene.SceneInfoMapper">
+
+    <resultMap id="SceneInfoMap" type="com.imaging.scheduler.system.domain.scene.SceneInfo">
+        <id column="id" property="id"/>
+        <result column="scene_name" property="sceneName"/>
+        <result column="scene_code" property="sceneCode"/>
+        <result column="group_id" property="groupId"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="group_name" property="groupName"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="SceneInfoMap">
+        SELECT s.*, g.group_name FROM scene_info s
+        LEFT JOIN scene_group g ON s.group_id = g.id
+        WHERE s.deleted = 0
+        <if test="sceneName != null and sceneName != ''">
+            AND s.scene_name LIKE CONCAT('%', #{sceneName}, '%')
+        </if>
+        <if test="groupId != null">
+            AND s.group_id = #{groupId}
+        </if>
+        <if test="status != null">
+            AND s.status = #{status}
+        </if>
+        ORDER BY s.created_at DESC
+    </select>
+
+    <select id="selectById" resultMap="SceneInfoMap">
+        SELECT s.*, g.group_name FROM scene_info s
+        LEFT JOIN scene_group g ON s.group_id = g.id
+        WHERE s.id = #{id} AND s.deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO scene_info(scene_name, group_id, description, status, deleted, created_at, updated_at)
+        VALUES(#{sceneName}, #{groupId}, #{description}, #{status}, 0, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE scene_info
+        <set>
+            <if test="sceneName != null">scene_name = #{sceneName},</if>
+            <if test="groupId != null">group_id = #{groupId},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE scene_info SET deleted = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="countDeviceBySceneId" resultType="int">
+        SELECT COUNT(1) FROM device_info WHERE scene_id = #{sceneId} AND deleted = 0
+    </select>
+
+    <select id="countTaskBySceneId" resultType="int">
+        SELECT COUNT(1) FROM task_info WHERE scene_id = #{sceneId} AND deleted = 0 AND status NOT IN (30, 40)
+    </select>
+
+    <select id="selectActiveScenes" resultMap="SceneInfoMap">
+        SELECT s.*, g.group_name FROM scene_info s
+        LEFT JOIN scene_group g ON s.group_id = g.id
+        WHERE s.deleted = 0 AND s.status = 1
+        ORDER BY s.scene_name ASC
+    </select>
+
+</mapper>

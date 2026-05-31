@@ -1,0 +1,68 @@
+server:
+  port: 19910
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: industrial-imaging-data-platform
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      url: jdbc:mysql://127.0.0.1:3306/industrial_imaging_data_platform_dev?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+      username: root
+      password:
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      max-wait: 60000
+      validation-query: SELECT 1 FROM DUAL
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    default-property-inclusion: non_null
+
+mybatis:
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  type-aliases-package: com.sursoft.iidp.system
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  info:
+    title: 工业级影像传感大数据处理软件 API 文档
+    description: IIDP 后台接口文档，包含数据源管理、接入任务、处理任务、存储管理及系统管理
+    version: 1.0.0
+
+iidp:
+  jwt:
+    secret: IidpJwtSecretKey2026ForProjectUse!!
+    expiration: 86400
+    refresh-expiration: 604800
+  aes:
+    key: IidpAesKey2026!!
+    iv: IidpAesIV2026!!
+
+logging:
+  level:
+    com.sursoft.iidp: debug
+    org.springframework.security: warn

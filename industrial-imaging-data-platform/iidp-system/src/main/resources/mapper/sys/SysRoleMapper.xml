@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.iidp.system.sys.mapper.SysRoleMapper">
+    <resultMap id="RoleMap" type="com.sursoft.iidp.system.sys.domain.SysRole">
+        <id property="id" column="id"/>
+        <result property="roleName" column="role_name"/>
+        <result property="roleKey" column="role_key"/>
+        <result property="sortOrder" column="sort_order"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+    <select id="selectList" resultMap="RoleMap">
+        SELECT * FROM sys_role
+        <where>
+        AND is_deleted = 0
+            <if test="roleName != null and roleName != ''">AND role_name LIKE CONCAT('%', #{roleName}, '%')</if>
+            <if test="status != null">AND status = #{status}</if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+    <select id="selectById" resultMap="RoleMap">SELECT * FROM sys_role WHERE id = #{id} AND is_deleted = 0</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_role(role_name, role_key, sort_order, status, remark, created_by, updated_by)
+        VALUES(#{roleName}, #{roleKey}, #{sortOrder}, #{status}, #{remark}, #{createdBy}, #{updatedBy})
+    </insert>
+    <update id="update">
+        UPDATE sys_role SET role_name=#{roleName}, role_key=#{roleKey}, sort_order=#{sortOrder}, status=#{status},
+        remark=#{remark}, updated_by=#{updatedBy}, updated_at=NOW() WHERE id=#{id}
+    </update>
+    <delete id="deleteById">UPDATE sys_role SET is_deleted = 1, updated_at=NOW() WHERE id = #{id}</delete>
+    <delete id="deleteRoleMenuByRoleId">DELETE FROM sys_role_menu WHERE role_id = #{roleId}</delete>
+    <insert id="insertRoleMenuBatch">
+        INSERT INTO sys_role_menu(role_id, menu_id) VALUES
+        <foreach collection="menuIds" item="menuId" separator=",">
+            (#{roleId}, #{menuId})
+        </foreach>
+    </insert>
+    <select id="selectMenuIdsByRoleId" resultType="long">
+        SELECT menu_id FROM sys_role_menu WHERE role_id = #{roleId}
+    </select>
+    <select id="selectRolesByUserId" resultMap="RoleMap">
+        SELECT r.* FROM sys_role r INNER JOIN sys_user_role ur ON ur.role_id = r.id WHERE ur.user_id = #{userId}
+    </select>
+    <delete id="deleteUserRoleByUserId">DELETE FROM sys_user_role WHERE user_id = #{userId}</delete>
+    <insert id="insertUserRoleBatch">
+        INSERT INTO sys_user_role(user_id, role_id) VALUES
+        <foreach collection="roleIds" item="roleId" separator=",">
+            (#{userId}, #{roleId})
+        </foreach>
+    </insert>
+    <select id="selectRoleIdsByUserId" resultType="long">
+        SELECT role_id FROM sys_user_role WHERE user_id = #{userId}
+    </select>
+</mapper>

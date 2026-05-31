@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.imaging.scheduler.system.mapper.device.DeviceInfoMapper">
+
+    <resultMap id="DeviceInfoMap" type="com.imaging.scheduler.system.domain.device.DeviceInfo">
+        <id column="id" property="id"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="device_code" property="deviceCode"/>
+        <result column="device_type" property="deviceType"/>
+        <result column="scene_id" property="sceneId"/>
+        <result column="ip_address" property="ipAddress"/>
+        <result column="model" property="modelSpec"/>
+        <result column="status" property="status"/>
+        <result column="deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="scene_name" property="sceneName"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="DeviceInfoMap">
+        SELECT d.*, s.scene_name FROM device_info d
+        LEFT JOIN scene_info s ON d.scene_id = s.id
+        WHERE d.deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND d.device_name LIKE CONCAT('%', #{keyword}, '%')
+        </if>
+        <if test="deviceType != null">
+            AND d.device_type = #{deviceType}
+        </if>
+        <if test="status != null">
+            AND d.status = #{status}
+        </if>
+        <if test="sceneId != null">
+            AND d.scene_id = #{sceneId}
+        </if>
+        ORDER BY d.created_at DESC
+    </select>
+
+    <select id="selectById" resultMap="DeviceInfoMap">
+        SELECT d.*, s.scene_name FROM device_info d
+        LEFT JOIN scene_info s ON d.scene_id = s.id
+        WHERE d.id = #{id} AND d.deleted = 0
+    </select>
+
+    <select id="selectByStatus" resultMap="DeviceInfoMap">
+        SELECT * FROM device_info WHERE status = #{status} AND deleted = 0
+    </select>
+
+    <select id="selectAvailableDevices" resultMap="DeviceInfoMap">
+        SELECT * FROM device_info WHERE status = 1 AND deleted = 0
+        <if test="sceneId != null">AND scene_id = #{sceneId}</if>
+        <if test="deviceType != null">AND device_type = #{deviceType}</if>
+    </select>
+
+    <select id="selectStatusOverview" resultType="map">
+        SELECT
+            CAST(SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS SIGNED) AS online,
+            CAST(SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS SIGNED) AS busy,
+            CAST(SUM(CASE WHEN status = 3 THEN 1 ELSE 0 END) AS SIGNED) AS offline,
+            CAST(SUM(CASE WHEN status = 4 THEN 1 ELSE 0 END) AS SIGNED) AS fault,
+            CAST(COUNT(1) AS SIGNED) AS total
+        FROM device_info WHERE deleted = 0
+    </select>
+
+    <select id="selectStatOverview" resultType="map">
+        SELECT
+            COUNT(1) AS total,
+            SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS online,
+            SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS busy,
+            SUM(CASE WHEN status = 3 THEN 1 ELSE 0 END) AS offline,
+            SUM(CASE WHEN status = 4 THEN 1 ELSE 0 END) AS fault
+        FROM device_info WHERE deleted = 0
+    </select>
+
+    <select id="selectStatTrend" resultType="map">
+        SELECT DATE_FORMAT(t.date_day, '%Y-%m-%d') AS date,
+               COUNT(DISTINCT tdr.device_id) AS usedDevices
+        FROM (
+            SELECT DATE_SUB(CURDATE(), INTERVAL n DAY) AS date_day
+            FROM (SELECT 0 n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+                  UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9
+                  UNION SELECT 10 UNION SELECT 11 UNION SELECT 12 UNION SELECT 13 UNION SELECT 14
+                  UNION SELECT 15 UNION SELECT 16 UNION SELECT 17 UNION SELECT 18 UNION SELECT 19
+                  UNION SELECT 20 UNION SELECT 21 UNION SELECT 22 UNION SELECT 23 UNION SELECT 24
+                  UNION SELECT 25 UNION SELECT 26 UNION SELECT 27 UNION SELECT 28 UNION SELECT 29) n
+            WHERE n.n &lt; #{days}
+        ) t
+        LEFT JOIN task_device_rel tdr ON DATE(tdr.assign_time) = t.date_day
+        GROUP BY t.date_day ORDER BY t.date_day ASC
+    </select>
+
+    <select id="selectStatByScene" resultType="map">
+        SELECT s.scene_name, COUNT(d.id) AS deviceCount
+        FROM scene_info s
+        LEFT JOIN device_info d ON d.scene_id = s.id AND d.deleted = 0
+        WHERE s.deleted = 0
+        GROUP BY s.id, s.scene_name
+        ORDER BY deviceCount DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO device_info(device_name, device_code, device_type, scene_id, ip_address, model, status, created_by, updated_by, created_at, updated_at)
+        VALUES(#{deviceName}, #{deviceCode}, #{deviceType}, #{sceneId}, #{ipAddress}, #{modelSpec}, #{status}, #{createdBy}, #{updatedBy}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE device_info
+        <set>
+            <if test="deviceName != null">device_name = #{deviceName},</if>
+            <if test="deviceType != null">device_type = #{deviceType},</if>
+            <if test="sceneId != null">scene_id = #{sceneId},</if>
+            <if test="ipAddress != null">ip_address = #{ipAddress},</if>
+            <if test="modelSpec != null">model = #{modelSpec},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE device_info SET deleted = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE device_info SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+</mapper>

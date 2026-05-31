@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sva.system.mapper.SysUserMapper">
+    <resultMap id="BaseRM" type="com.sva.system.domain.SysUser">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="real_name" property="realName"/>
+        <result column="phone" property="phone"/>
+        <result column="department" property="department"/>
+        <result column="status" property="status"/>
+        <result column="last_login_at" property="lastLoginAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+    <select id="selectList" resultMap="BaseRM">
+        SELECT u.* FROM sys_user u
+        <if test="roleId != null">INNER JOIN sys_user_role ur ON u.id=ur.user_id AND ur.role_id=#{roleId}</if>
+        WHERE u.deleted=0
+        <if test="realName != null and realName != ''">AND u.real_name LIKE CONCAT('%',#{realName},'%')</if>
+        <if test="username != null and username != ''">AND u.username LIKE CONCAT('%',#{username},'%')</if>
+        <if test="status != null">AND u.status=#{status}</if>
+        ORDER BY u.created_at DESC
+    </select>
+    <select id="selectById" resultMap="BaseRM">SELECT * FROM sys_user WHERE id=#{id} AND deleted=0</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user(username,password,real_name,phone,department,status,created_by,created_at,updated_at,deleted)
+        VALUES(#{username},#{password},#{realName},#{phone},#{department},#{status},#{createdBy},NOW(),NOW(),0)
+    </insert>
+    <update id="update">
+        UPDATE sys_user SET real_name=#{realName},phone=#{phone},department=#{department},updated_at=NOW()
+        WHERE id=#{id} AND deleted=0
+    </update>
+    <update id="deleteById">UPDATE sys_user SET deleted=1,updated_at=NOW() WHERE id=#{id}</update>
+    <update id="updateStatus">UPDATE sys_user SET status=#{status},updated_at=NOW() WHERE id=#{id}</update>
+    <update id="updatePassword">UPDATE sys_user SET password=#{password},updated_at=NOW() WHERE id=#{id}</update>
+    <insert id="insertUserRoles">
+        INSERT INTO sys_user_role(user_id,role_id) VALUES
+        <foreach collection="roleIds" item="rid" separator=",">(#{userId},#{rid})</foreach>
+    </insert>
+    <delete id="deleteUserRoles">DELETE FROM sys_user_role WHERE user_id=#{userId}</delete>
+    <select id="selectRoleIdsByUserId" resultType="long">
+        SELECT role_id FROM sys_user_role WHERE user_id=#{userId}
+    </select>
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.iidp.system.datasource.mapper.DatasourceConfigMapper">
+    <resultMap id="DsMap" type="com.sursoft.iidp.system.datasource.domain.DatasourceConfig">
+        <id property="id" column="id"/>
+        <result property="datasourceCode" column="datasource_code"/>
+        <result property="datasourceName" column="datasource_name"/>
+        <result property="datasourceType" column="datasource_type"/>
+        <result property="host" column="host"/>
+        <result property="port" column="port"/>
+        <result property="authType" column="auth_type"/>
+        <result property="authUsername" column="auth_username"/>
+        <result property="authPassword" column="auth_password"/>
+        <result property="authKey" column="auth_key"/>
+        <result property="dataFormat" column="data_format"/>
+        <result property="extConfig" column="ext_config"/>
+        <result property="ownerId" column="owner_id"/>
+        <result property="status" column="status"/>
+        <result property="remark" column="remark"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+    <select id="selectList" resultMap="DsMap">
+        SELECT * FROM datasource_config
+        <where>
+            AND is_deleted = 0
+            <if test="datasourceName != null and datasourceName != ''">AND datasource_name LIKE CONCAT('%', #{datasourceName}, '%')</if>
+            <if test="datasourceType != null and datasourceType != ''">AND datasource_type = #{datasourceType}</if>
+            <if test="status != null">AND status = #{status}</if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+    <select id="selectById" resultMap="DsMap">SELECT * FROM datasource_config WHERE id = #{id} AND is_deleted = 0</select>
+    <select id="checkNameUnique" resultType="int">
+        SELECT COUNT(1) FROM datasource_config WHERE datasource_name = #{name} AND is_deleted = 0
+        <if test="excludeId != null">AND id != #{excludeId}</if>
+    </select>
+    <select id="selectMaxCode" resultType="string">
+        SELECT datasource_code FROM datasource_config ORDER BY id DESC LIMIT 1
+    </select>
+    <select id="countTotal" resultType="long">SELECT COUNT(1) FROM datasource_config WHERE is_deleted = 0</select>
+    <select id="countByStatus" resultType="long">SELECT COUNT(1) FROM datasource_config WHERE status = #{status} AND is_deleted = 0</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO datasource_config(datasource_code,datasource_name,datasource_type,host,port,
+        auth_type,auth_username,auth_password,auth_key,data_format,ext_config,owner_id,status,remark,created_by,updated_by)
+        VALUES(#{datasourceCode},#{datasourceName},#{datasourceType},#{host},#{port},
+        #{authType},#{authUsername},#{authPassword},#{authKey},#{dataFormat},#{extConfig},#{ownerId},#{status},#{remark},#{createdBy},#{updatedBy})
+    </insert>
+    <update id="update">
+        UPDATE datasource_config
+        <set>
+            <if test="datasourceName != null">datasource_name = #{datasourceName},</if>
+            <if test="datasourceType != null">datasource_type = #{datasourceType},</if>
+            <if test="host != null">host = #{host},</if>
+            <if test="port != null">port = #{port},</if>
+            <if test="authType != null">auth_type = #{authType},</if>
+            <if test="authUsername != null">auth_username = #{authUsername},</if>
+            <if test="authPassword != null">auth_password = #{authPassword},</if>
+            <if test="authKey != null">auth_key = #{authKey},</if>
+            <if test="dataFormat != null">data_format = #{dataFormat},</if>
+            <if test="extConfig != null">ext_config = #{extConfig},</if>
+            <if test="ownerId != null">owner_id = #{ownerId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updatedBy != null">updated_by = #{updatedBy},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteById">UPDATE datasource_config SET is_deleted = 1, updated_at = NOW() WHERE id = #{id}</delete>
+    <update id="updateStatus">UPDATE datasource_config SET status = #{status}, updated_at = NOW() WHERE id = #{id}</update>
+</mapper>

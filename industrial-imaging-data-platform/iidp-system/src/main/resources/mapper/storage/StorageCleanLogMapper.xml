@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.iidp.system.storage.mapper.StorageCleanLogMapper">
+    <resultMap id="CleanLogMap" type="com.sursoft.iidp.system.storage.domain.StorageCleanLog">
+        <id property="id" column="id"/>
+        <result property="ruleId" column="rule_id"/>
+        <result property="ruleName" column="rule_name"/>
+        <result property="executeTime" column="execute_time"/>
+        <result property="executeType" column="execute_type"/>
+        <result property="deletedCount" column="deleted_count"/>
+        <result property="freedBytes" column="freed_bytes"/>
+        <result property="executeStatus" column="execute_status"/>
+        <result property="errorMsg" column="error_msg"/>
+        <result property="executedBy" column="executed_by"/>
+    </resultMap>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO storage_clean_log(rule_id,execute_time,execute_type,deleted_count,freed_bytes,execute_status,error_msg,executed_by)
+        VALUES(#{ruleId},#{executeTime},#{executeType},#{deletedCount},#{freedBytes},#{executeStatus},#{errorMsg},#{executedBy})
+    </insert>
+    <select id="selectList" resultMap="CleanLogMap">
+        SELECT l.*, r.rule_name FROM storage_clean_log l
+        LEFT JOIN storage_clean_rule r ON r.id = l.rule_id
+        <where>
+            <if test="ruleId != null">AND l.rule_id = #{ruleId}</if>
+        </where>
+        ORDER BY l.execute_time DESC
+    </select>
+</mapper>

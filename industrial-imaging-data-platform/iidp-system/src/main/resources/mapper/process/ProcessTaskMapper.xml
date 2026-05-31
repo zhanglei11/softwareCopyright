@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.iidp.system.process.mapper.ProcessTaskMapper">
+    <resultMap id="ProcTaskMap" type="com.sursoft.iidp.system.process.domain.ProcessTask">
+        <id property="id" column="id"/>
+        <result property="taskCode" column="task_code"/>
+        <result property="taskName" column="task_name"/>
+        <result property="inputDir" column="input_dir"/>
+        <result property="processType" column="process_type"/>
+        <result property="processParams" column="process_params"/>
+        <result property="outputDir" column="output_dir"/>
+        <result property="executeType" column="execute_type"/>
+        <result property="cronExpression" column="cron_expression"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+    <select id="selectList" resultMap="ProcTaskMap">
+        SELECT * FROM process_task
+        <where>
+            is_deleted = 0
+            <if test="taskName != null and taskName != ''">AND task_name LIKE CONCAT('%', #{taskName}, '%')</if>
+            <if test="processType != null and processType != ''">AND process_type = #{processType}</if>
+            <if test="status != null">AND status = #{status}</if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+    <select id="selectById" resultMap="ProcTaskMap">SELECT * FROM process_task WHERE id = #{id} AND is_deleted = 0</select>
+    <select id="checkNameUnique" resultType="int">
+        SELECT COUNT(1) FROM process_task WHERE task_name = #{name} AND is_deleted = 0
+        <if test="excludeId != null">AND id != #{excludeId}</if>
+    </select>
+    <select id="selectMaxCode" resultType="string">SELECT task_code FROM process_task ORDER BY id DESC LIMIT 1</select>
+    <select id="countTotal" resultType="long">SELECT COUNT(1) FROM process_task WHERE is_deleted = 0</select>
+    <select id="countByStatus" resultType="long">SELECT COUNT(1) FROM process_task WHERE status = #{status} AND is_deleted = 0</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO process_task(task_code,task_name,input_dir,process_type,process_params,
+        output_dir,execute_type,cron_expression,status,created_by,updated_by)
+        VALUES(#{taskCode},#{taskName},#{inputDir},#{processType},#{processParams},
+        #{outputDir},#{executeType},#{cronExpression},#{status},#{createdBy},#{updatedBy})
+    </insert>
+    <update id="update">
+        UPDATE process_task
+        <set>
+            <if test="taskName != null">task_name = #{taskName},</if>
+            <if test="inputDir != null">input_dir = #{inputDir},</if>
+            <if test="processType != null">process_type = #{processType},</if>
+            <if test="processParams != null">process_params = #{processParams},</if>
+            <if test="outputDir != null">output_dir = #{outputDir},</if>
+            <if test="executeType != null">execute_type = #{executeType},</if>
+            <if test="cronExpression != null">cron_expression = #{cronExpression},</if>
+            <if test="updatedBy != null">updated_by = #{updatedBy},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteById">UPDATE process_task SET is_deleted = 1, updated_at = NOW() WHERE id = #{id}</delete>
+    <update id="updateStatus">UPDATE process_task SET status = #{status}, updated_at = NOW() WHERE id = #{id}</update>
+</mapper>

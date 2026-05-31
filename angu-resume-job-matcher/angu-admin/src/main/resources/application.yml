@@ -1,0 +1,34 @@
+server:
+  port: 19915
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: angu-resume-job-matcher
+  profiles:
+    active: dev
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 15MB
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  default-flat-param-object: true
+
+app:
+  jwt:
+    secret: AnguResumeJobMatcher@SecretKey2026!
+    access-expire-minutes: 120
+    refresh-expire-days: 7
+  upload:
+    path: ./uploads

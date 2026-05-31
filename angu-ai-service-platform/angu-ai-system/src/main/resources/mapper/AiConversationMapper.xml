@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.ai.system.mapper.AiConversationMapper">
+
+    <resultMap id="ConvVOMap" type="com.angu.ai.system.domain.vo.ConversationVO">
+        <id column="id" property="id"/>
+        <result column="scene_id" property="sceneId"/>
+        <result column="scene_name" property="sceneName"/>
+        <result column="title" property="title"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+    </resultMap>
+
+    <select id="selectPage" resultMap="ConvVOMap">
+        SELECT c.id, c.scene_id, s.name AS scene_name, c.title, c.created_time, c.updated_time
+        FROM ai_conversation c
+        LEFT JOIN ai_scene s ON c.scene_id = s.id
+        WHERE c.deleted = 0 AND c.user_id = #{userId}
+        <if test="q.sceneId != null">AND c.scene_id = #{q.sceneId}</if>
+        <if test="q.keyword != null and q.keyword != ''">
+            AND c.title LIKE CONCAT('%', #{q.keyword}, '%')
+        </if>
+        <if test="q.startTime != null and q.startTime != ''">
+            AND c.created_time >= #{q.startTime}
+        </if>
+        <if test="q.endTime != null and q.endTime != ''">
+            AND c.created_time &lt;= #{q.endTime}
+        </if>
+        ORDER BY c.updated_time DESC
+    </select>
+
+    <select id="selectAdminPage" resultMap="ConvVOMap">
+        SELECT c.id, c.scene_id, s.name AS scene_name, c.title, c.created_time, c.updated_time
+        FROM ai_conversation c
+        LEFT JOIN ai_scene s ON c.scene_id = s.id
+        WHERE c.deleted = 0
+        <if test="q.userId != null">AND c.user_id = #{q.userId}</if>
+        <if test="q.sceneId != null">AND c.scene_id = #{q.sceneId}</if>
+        <if test="q.keyword != null and q.keyword != ''">
+            AND c.title LIKE CONCAT('%', #{q.keyword}, '%')
+        </if>
+        ORDER BY c.updated_time DESC
+    </select>
+
+    <select id="selectById" resultMap="ConvVOMap">
+        SELECT c.id, c.scene_id, s.name AS scene_name, c.title, c.created_time, c.updated_time
+        FROM ai_conversation c
+        LEFT JOIN ai_scene s ON c.scene_id = s.id
+        WHERE c.id = #{id} AND c.deleted = 0
+    </select>
+
+    <select id="selectEntityById" resultType="com.angu.ai.system.domain.entity.AiConversation">
+        SELECT * FROM ai_conversation WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_conversation (user_id, scene_id, title, deleted, created_time, updated_time)
+        VALUES (#{userId}, #{sceneId}, #{title}, 0, NOW(), NOW())
+    </insert>
+
+    <update id="updateById">
+        UPDATE ai_conversation
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="deleted != null">deleted = #{deleted},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE ai_conversation SET deleted = 1, updated_time = NOW() WHERE id = #{id}
+    </update>
+
+
+    <update id="updateTitle">
+        UPDATE ai_conversation SET title = #{title}, updated_time = NOW() WHERE id = #{id}
+    </update>
+
+</mapper>

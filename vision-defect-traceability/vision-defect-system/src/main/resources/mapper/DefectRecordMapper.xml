@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.vision.system.mapper.DefectRecordMapper">
+
+    <resultMap id="RM" type="com.sursoft.vision.system.domain.DefectRecord">
+        <id property="id" column="id"/>
+        <result property="serialNo" column="serial_no"/>
+        <result property="batchNo" column="batch_no"/>
+        <result property="lineId" column="line_id"/>
+        <result property="productId" column="product_id"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="level" column="level"/>
+        <result property="result" column="result"/>
+        <result property="shift" column="shift"/>
+        <result property="detectTime" column="detect_time"/>
+        <result property="disposeStatus" column="dispose_status"/>
+        <result property="disposeRemark" column="dispose_remark"/>
+        <result property="disposeBy" column="dispose_by"/>
+        <result property="disposeAt" column="dispose_at"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <resultMap id="VO" type="com.sursoft.vision.system.vo.DefectRecordVO">
+        <id property="id" column="id"/>
+        <result property="serialNo" column="serial_no"/>
+        <result property="batchNo" column="batch_no"/>
+        <result property="lineName" column="line_name"/>
+        <result property="productTypeName" column="type_name"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="level" column="level"/>
+        <result property="result" column="result"/>
+        <result property="shift" column="shift"/>
+        <result property="detectTime" column="detect_time"/>
+        <result property="disposeStatus" column="dispose_status"/>
+    </resultMap>
+
+    <sql id="voSelect">
+        SELECT dr.id, dr.serial_no, dr.batch_no, li.line_name, pt.type_name,
+               dc.name AS category_name, dr.level, dr.result, dr.shift, dr.detect_time,
+               dr.dispose_status, dr.dispose_remark
+        FROM defect_record dr
+        LEFT JOIN line_info li ON dr.line_id = li.id
+        LEFT JOIN product_type pt ON dr.product_id = pt.id
+        LEFT JOIN defect_category dc ON dr.category_id = dc.id
+        WHERE dr.is_deleted = 0
+    </sql>
+
+    <select id="selectById" resultMap="RM">SELECT * FROM defect_record WHERE id=#{id} AND is_deleted=0</select>
+
+    <select id="selectVoById" resultMap="VO">
+        <include refid="voSelect"/> AND dr.id=#{id}
+    </select>
+
+    <select id="selectList" resultMap="VO">
+        <include refid="voSelect"/>
+        <if test="lineId != null">AND dr.line_id=#{lineId}</if>
+        <if test="productId != null">AND dr.product_id=#{productId}</if>
+        <if test="categoryId != null">AND dr.category_id=#{categoryId}</if>
+        <if test="level != null">AND dr.level=#{level}</if>
+        <if test="result != null">AND dr.result=#{result}</if>
+        <if test="shift != null and shift != ''">AND dr.shift=#{shift}</if>
+        <if test="startTime != null and startTime != ''">AND dr.detect_time &gt;= #{startTime}</if>
+        <if test="endTime != null and endTime != ''">AND dr.detect_time &lt;= #{endTime}</if>
+        ORDER BY dr.detect_time DESC
+    </select>
+
+    <select id="selectByBatchNo" resultMap="VO">
+        <include refid="voSelect"/>
+        AND dr.batch_no=#{batchNo}
+        <if test="lineId != null">AND dr.line_id=#{lineId}</if>
+        ORDER BY dr.detect_time DESC
+    </select>
+
+    <select id="selectBySerialNo" resultMap="VO">
+        <include refid="voSelect"/> AND dr.serial_no=#{serialNo} ORDER BY dr.detect_time ASC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO defect_record(serial_no,batch_no,line_id,product_id,category_id,level,result,shift,detect_time,dispose_status,is_deleted,created_at)
+        VALUES(#{serialNo},#{batchNo},#{lineId},#{productId},#{categoryId},#{level},#{result},#{shift},#{detectTime},0,0,NOW())
+    </insert>
+
+    <update id="updateDisposeStatus">
+        UPDATE defect_record SET dispose_status=#{disposeStatus},dispose_remark=#{disposeRemark},dispose_by=#{disposeBy},dispose_at=#{disposeAt}
+        WHERE id=#{id}
+    </update>
+
+    <!-- Dashboard stats -->
+    <select id="countTodayTotal" resultType="long">
+        SELECT COUNT(*) FROM defect_record WHERE DATE(detect_time)=#{date} AND is_deleted=0
+    </select>
+    <select id="countTodayDefect" resultType="long">
+        SELECT COUNT(*) FROM defect_record WHERE DATE(detect_time)=#{date} AND result=0 AND is_deleted=0
+    </select>
+    <select id="countTodayQualified" resultType="long">
+        SELECT COUNT(*) FROM defect_record WHERE DATE(detect_time)=#{date} AND result=1 AND is_deleted=0
+    </select>
+    <select id="selectMonthTrend" resultType="com.sursoft.vision.system.vo.DashboardVO$TrendItem">
+        SELECT DATE(detect_time) AS date,
+               ROUND(SUM(result)/COUNT(*),4) AS qualifiedRate
+        FROM defect_record WHERE detect_time &gt;= #{startDate} AND is_deleted=0
+        GROUP BY DATE(detect_time) ORDER BY date ASC
+    </select>
+    <select id="selectCategoryDistribution" resultType="com.sursoft.vision.system.vo.NameValueVO">
+        SELECT dc.name AS name, COUNT(*) AS value
+        FROM defect_record dr JOIN defect_category dc ON dr.category_id=dc.id
+        WHERE dr.is_deleted=0 AND dr.result=0
+        <if test="startDate != null and startDate != ''">AND DATE(dr.detect_time) &gt;= #{startDate}</if>
+        <if test="endDate != null and endDate != ''">AND DATE(dr.detect_time) &lt;= #{endDate}</if>
+        GROUP BY dc.id,dc.name ORDER BY value DESC LIMIT 10
+    </select>
+    <select id="selectLineComparison" resultType="com.sursoft.vision.system.vo.DashboardVO$LineCompareVO">
+        SELECT li.line_name AS lineName, COUNT(*) AS defectCount
+        FROM defect_record dr JOIN line_info li ON dr.line_id=li.id
+        WHERE dr.is_deleted=0 AND dr.result=0 AND DATE(dr.detect_time)=#{date}
+        GROUP BY li.id,li.line_name ORDER BY defectCount DESC
+    </select>
+    <!-- Trend -->
+    <select id="selectTrend" resultType="com.sursoft.vision.system.vo.TrendVO$TrendItem">
+        SELECT
+        <choose>
+            <when test="granularity == 'week'">DATE_FORMAT(detect_time,'%x-%v')</when>
+            <when test="granularity == 'month'">DATE_FORMAT(detect_time,'%Y-%m')</when>
+            <otherwise>DATE(detect_time)</otherwise>
+        </choose>
+        AS date, COUNT(*) AS totalCount, ROUND(SUM(result)/COUNT(*),4) AS qualifiedRate
+        FROM defect_record WHERE is_deleted=0
+        <if test="startDate != null and startDate != ''">AND DATE(detect_time) &gt;= #{startDate}</if>
+        <if test="endDate != null and endDate != ''">AND DATE(detect_time) &lt;= #{endDate}</if>
+        <if test="lineId != null">AND line_id=#{lineId}</if>
+        <if test="categoryId != null">AND category_id=#{categoryId}</if>
+        GROUP BY 1 ORDER BY 1 ASC
+    </select>
+    <!-- Batch trace -->
+    <select id="countBatchTotal" resultType="long">
+        SELECT COUNT(*) FROM defect_record WHERE batch_no=#{batchNo} AND is_deleted=0
+        <if test="lineId != null">AND line_id=#{lineId}</if>
+    </select>
+    <select id="countBatchQualified" resultType="long">
+        SELECT COUNT(*) FROM defect_record WHERE batch_no=#{batchNo} AND result=1 AND is_deleted=0
+        <if test="lineId != null">AND line_id=#{lineId}</if>
+    </select>
+    <select id="selectBatchCategoryDist" resultType="com.sursoft.vision.system.vo.BatchTraceVO$CategoryDistVO">
+        SELECT dc.name AS categoryName, COUNT(*) AS count,
+               ROUND(COUNT(*) / (SELECT COUNT(*) FROM defect_record WHERE batch_no=#{batchNo} AND result=0 AND is_deleted=0),4) AS ratio
+        FROM defect_record dr JOIN defect_category dc ON dr.category_id=dc.id
+        WHERE dr.batch_no=#{batchNo} AND dr.result=0 AND dr.is_deleted=0
+        <if test="lineId != null">AND dr.line_id=#{lineId}</if>
+        GROUP BY dc.id,dc.name ORDER BY count DESC
+    </select>
+</mapper>

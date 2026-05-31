@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.ai.system.mapper.AiSceneMapper">
+
+    <resultMap id="SceneVOMap" type="com.angu.ai.system.domain.vo.SceneVO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="icon" property="icon"/>
+        <result column="description" property="description"/>
+        <result column="usage_guide" property="usageGuide"/>
+        <result column="model_id" property="modelId"/>
+        <result column="model_name" property="modelName"/>
+        <result column="kb_id" property="kbId"/>
+        <result column="system_prompt" property="systemPrompt"/>
+        <result column="user_prompt_tpl" property="userPromptTpl"/>
+        <result column="input_variables" property="inputVariables"/>
+        <result column="max_tokens" property="maxTokens"/>
+        <result column="temperature" property="temperature"/>
+        <result column="multi_turn" property="multiTurn"/>
+        <result column="status" property="status"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+    </resultMap>
+
+    <sql id="baseSelect">
+        SELECT s.id, s.name, s.category_id, c.name AS category_name,
+               s.icon, s.description, s.usage_guide, s.model_id, m.model_name,
+               s.kb_id, s.system_prompt, s.user_prompt_tpl, s.input_variables,
+               s.max_tokens, s.temperature, s.multi_turn, s.status,
+               s.created_time, s.updated_time
+        FROM ai_scene s
+        LEFT JOIN ai_scene_category c ON s.category_id = c.id
+        LEFT JOIN ai_model_config m ON s.model_id = m.id
+    </sql>
+
+    <select id="selectPage" resultMap="SceneVOMap">
+        <include refid="baseSelect"/>
+        WHERE s.deleted = 0
+        <if test="q.categoryId != null">AND s.category_id = #{q.categoryId}</if>
+        <if test="q.status != null and q.status != ''">AND s.status = #{q.status}</if>
+        <if test="q.keyword != null and q.keyword != ''">
+            AND (s.name LIKE CONCAT('%', #{q.keyword}, '%') OR s.description LIKE CONCAT('%', #{q.keyword}, '%'))
+        </if>
+        ORDER BY s.created_time DESC
+    </select>
+
+    <select id="selectById" resultMap="SceneVOMap">
+        <include refid="baseSelect"/>
+        WHERE s.id = #{id} AND s.deleted = 0
+    </select>
+
+    <select id="selectEntityById" resultType="com.angu.ai.system.domain.entity.AiScene">
+        SELECT * FROM ai_scene WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_scene (name, category_id, icon, description, usage_guide, model_id, kb_id,
+                              system_prompt, user_prompt_tpl, input_variables, max_tokens, temperature,
+                              multi_turn, status, deleted, creator_id, created_time, updated_time)
+        VALUES (#{name}, #{categoryId}, #{icon}, #{description}, #{usageGuide}, #{modelId}, #{kbId},
+                #{systemPrompt}, #{userPromptTpl}, #{inputVariables}, #{maxTokens}, #{temperature},
+                #{multiTurn}, 'DRAFT', 0, #{creatorId}, NOW(), NOW())
+    </insert>
+
+    <update id="updateById">
+        UPDATE ai_scene
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="icon != null">icon = #{icon},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="usageGuide != null">usage_guide = #{usageGuide},</if>
+            <if test="modelId != null">model_id = #{modelId},</if>
+            kb_id = #{kbId},
+            <if test="systemPrompt != null">system_prompt = #{systemPrompt},</if>
+            <if test="userPromptTpl != null">user_prompt_tpl = #{userPromptTpl},</if>
+            <if test="inputVariables != null">input_variables = #{inputVariables},</if>
+            <if test="maxTokens != null">max_tokens = #{maxTokens},</if>
+            <if test="temperature != null">temperature = #{temperature},</if>
+            <if test="multiTurn != null">multi_turn = #{multiTurn},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE ai_scene SET deleted = 1, updated_time = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="selectOnlineByUserId" resultMap="SceneVOMap">
+        <include refid="baseSelect"/>
+        WHERE s.deleted = 0 AND s.status = 'ONLINE'
+        <if test="keyword != null and keyword != ''">
+            AND (s.name LIKE CONCAT('%', #{keyword}, '%') OR s.description LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY s.created_time DESC
+    </select>
+
+
+    <update id="updateStatus">
+        UPDATE ai_scene SET status = #{status}, updated_time = NOW() WHERE id = #{id}
+    </update>
+
+</mapper>

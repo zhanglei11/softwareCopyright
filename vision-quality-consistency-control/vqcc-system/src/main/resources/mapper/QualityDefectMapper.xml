@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vqcc.system.mapper.QualityDefectMapper">
+    <resultMap id="BaseResultMap" type="com.vqcc.system.domain.QualityDefect">
+        <id column="id" property="id"/>
+        <result column="defect_code" property="defectCode"/>
+        <result column="task_id" property="taskId"/>
+        <result column="image_id" property="imageId"/>
+        <result column="exceeded_metrics" property="exceededMetrics"/>
+        <result column="exceeded_values" property="exceededValues"/>
+        <result column="standard_ranges" property="standardRanges"/>
+        <result column="found_at" property="foundAt"/>
+        <result column="dispose_status" property="disposeStatus"/>
+        <result column="verify_status" property="verifyStatus"/>
+        <result column="ignore_reason" property="ignoreReason"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="task_code" property="taskCode"/>
+        <result column="task_name" property="taskName"/>
+    </resultMap>
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT d.*, t.task_code, t.task_name
+        FROM quality_defect d LEFT JOIN quality_task t ON t.id = d.task_id
+        WHERE d.is_deleted = 0
+        <if test="taskId != null">AND d.task_id = #{taskId}</if>
+        <if test="disposeStatus != null">AND d.dispose_status = #{disposeStatus}</if>
+        <if test="verifyStatus != null">AND d.verify_status = #{verifyStatus}</if>
+        <if test="imageId != null and imageId != ''">AND d.image_id LIKE CONCAT('%',#{imageId},'%')</if>
+        ORDER BY d.id DESC
+    </select>
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT d.*, t.task_code, t.task_name
+        FROM quality_defect d LEFT JOIN quality_task t ON t.id = d.task_id
+        WHERE d.id = #{id} AND d.is_deleted = 0
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quality_defect (defect_code, task_id, image_id, exceeded_metrics, exceeded_values,
+            standard_ranges, found_at, dispose_status, verify_status, created_at, created_by, updated_at, updated_by)
+        VALUES (#{defectCode}, #{taskId}, #{imageId}, #{exceededMetrics}, #{exceededValues},
+                #{standardRanges}, NOW(), 1, 0, NOW(), #{createdBy}, NOW(), #{createdBy})
+    </insert>
+    <update id="update">
+        UPDATE quality_defect
+        <set>
+            updated_at = NOW(),
+            <if test="disposeStatus != null">dispose_status = #{disposeStatus},</if>
+            <if test="verifyStatus != null">verify_status = #{verifyStatus},</if>
+            <if test="ignoreReason != null">ignore_reason = #{ignoreReason},</if>
+            updated_by = #{updatedBy}
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+    <update id="deleteById">
+        UPDATE quality_defect SET is_deleted = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
+    <select id="selectMaxCodeByDate" resultType="string">
+        SELECT defect_code FROM quality_defect WHERE defect_code LIKE CONCAT('DEF-',#{dateStr},'%')
+        ORDER BY id DESC LIMIT 1
+    </select>
+    <select id="selectTrendStats" resultType="map">
+        SELECT DATE(found_at) AS stat_date,
+               COUNT(*) AS total,
+               SUM(CASE WHEN dispose_status = 3 THEN 1 ELSE 0 END) AS disposed_count,
+               SUM(CASE WHEN verify_status = 1 THEN 1 ELSE 0 END) AS verified_count
+        FROM quality_defect
+        WHERE is_deleted = 0
+        <if test="startDate != null">AND DATE(found_at) >= #{startDate}</if>
+        <if test="endDate != null">AND DATE(found_at) &lt;= #{endDate}</if>
+        GROUP BY DATE(found_at)
+        ORDER BY stat_date
+    </select>
+    <select id="selectSummaryStats" resultType="map">
+        SELECT COUNT(*) AS total,
+               SUM(CASE WHEN dispose_status = 1 THEN 1 ELSE 0 END) AS pending_count,
+               SUM(CASE WHEN dispose_status = 2 THEN 1 ELSE 0 END) AS processing_count,
+               SUM(CASE WHEN dispose_status = 3 THEN 1 ELSE 0 END) AS disposed_count,
+               SUM(CASE WHEN dispose_status = 4 THEN 1 ELSE 0 END) AS ignored_count,
+               SUM(CASE WHEN verify_status = 1 THEN 1 ELSE 0 END) AS verified_pass_count,
+               SUM(CASE WHEN verify_status = 2 THEN 1 ELSE 0 END) AS verified_fail_count
+        FROM quality_defect WHERE is_deleted = 0
+    </select>
+</mapper>

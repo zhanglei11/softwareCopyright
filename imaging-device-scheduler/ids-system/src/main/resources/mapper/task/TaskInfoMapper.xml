@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.imaging.scheduler.system.mapper.task.TaskInfoMapper">
+
+    <select id="selectList" resultType="com.imaging.scheduler.system.domain.task.TaskInfo">
+        SELECT t.*, s.scene_name FROM task_info t
+        LEFT JOIN scene_info s ON t.scene_id = s.id
+        WHERE t.deleted = 0
+        <if test="taskName != null and taskName != ''">
+            AND t.task_name LIKE CONCAT('%', #{taskName}, '%')
+        </if>
+        <if test="sceneId != null">
+            AND t.scene_id = #{sceneId}
+        </if>
+        <if test="status != null">
+            AND t.status = #{status}
+        </if>
+        <if test="priority != null">
+            AND t.priority = #{priority}
+        </if>
+        ORDER BY t.priority DESC, t.created_at DESC
+    </select>
+
+    <select id="selectById" resultType="com.imaging.scheduler.system.domain.task.TaskInfo">
+        SELECT t.*, s.scene_name FROM task_info t
+        LEFT JOIN scene_info s ON t.scene_id = s.id
+        WHERE t.id = #{id} AND t.deleted = 0
+    </select>
+
+    <select id="countByStatus" resultType="int">
+        SELECT COUNT(1) FROM task_info WHERE status = #{status} AND deleted = 0
+    </select>
+
+    <select id="countTodayByStatus" resultType="int">
+        SELECT COUNT(1) FROM task_info
+        WHERE status = #{status} AND deleted = 0
+          AND DATE(created_at) = CURDATE()
+    </select>
+
+    <select id="selectGanttData" resultType="map">
+        SELECT t.id, t.task_name, t.status, t.priority,
+               t.plan_start_time AS planStartTime, t.plan_end_time AS planEndTime,
+               t.actual_start_time AS actualStartTime, t.actual_end_time AS actualEndTime,
+               s.scene_name, s.id AS sceneId,
+               GROUP_CONCAT(d.device_name) AS deviceNames
+        FROM task_info t
+        LEFT JOIN scene_info s ON t.scene_id = s.id
+        LEFT JOIN task_device_rel tdr ON t.id = tdr.task_id AND tdr.is_active = 1
+        LEFT JOIN device_info d ON tdr.device_id = d.id
+        WHERE t.deleted = 0 AND t.status NOT IN (-20)
+        <if test="sceneId != null">AND t.scene_id = #{sceneId}</if>
+        <if test="date != null and date != ''">AND DATE(t.plan_start_time) = #{date}</if>
+        GROUP BY t.id
+        ORDER BY t.plan_start_time ASC
+    </select>
+
+    <select id="selectTimeoutTasks" resultType="map">
+        SELECT t.id, t.task_name, t.plan_end_time AS planEndTime, t.status,
+               s.scene_name, TIMESTAMPDIFF(MINUTE, t.plan_end_time, NOW()) AS overdueMinutes
+        FROM task_info t
+        LEFT JOIN scene_info s ON t.scene_id = s.id
+        WHERE t.deleted = 0 AND t.status IN (20, 30)
+          AND t.plan_end_time &lt; NOW()
+        ORDER BY overdueMinutes DESC
+    </select>
+
+    <select id="selectTaskOverview" resultType="map">
+        SELECT
+            COUNT(1) AS total,
+            SUM(CASE WHEN status = 10 THEN 1 ELSE 0 END) AS pending,
+            SUM(CASE WHEN status = 20 THEN 1 ELSE 0 END) AS assigned,
+            SUM(CASE WHEN status = 30 THEN 1 ELSE 0 END) AS running,
+            SUM(CASE WHEN status = 50 THEN 1 ELSE 0 END) AS completed,
+            SUM(CASE WHEN status = -20 THEN 1 ELSE 0 END) AS cancelled
+        FROM task_info WHERE deleted = 0
+    </select>
+
+    <select id="selectStatusBreakdown" resultType="map">
+        SELECT status, COUNT(1) AS cnt FROM task_info
+        WHERE deleted = 0 GROUP BY status
+    </select>
+
+    <select id="selectTaskByScene" resultType="map">
+        SELECT s.scene_name, COUNT(t.id) AS taskCount
+        FROM scene_info s
+        LEFT JOIN task_info t ON t.scene_id = s.id AND t.deleted = 0
+        WHERE s.deleted = 0
+        GROUP BY s.id, s.scene_name
+        ORDER BY taskCount DESC
+    </select>
+
+    <select id="selectTaskTrend" resultType="map">
+        SELECT DATE_FORMAT(t.date_day, '%Y-%m-%d') AS date,
+               COUNT(ti.id) AS newTasks,
+               SUM(CASE WHEN ti.status = 50 THEN 1 ELSE 0 END) AS completedTasks
+        FROM (
+            SELECT DATE_SUB(CURDATE(), INTERVAL n DAY) AS date_day
+            FROM (SELECT 0 n UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4
+                  UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9
+                  UNION SELECT 10 UNION SELECT 11 UNION SELECT 12 UNION SELECT 13 UNION SELECT 14
+                  UNION SELECT 15 UNION SELECT 16 UNION SELECT 17 UNION SELECT 18 UNION SELECT 19
+                  UNION SELECT 20 UNION SELECT 21 UNION SELECT 22 UNION SELECT 23 UNION SELECT 24
+                  UNION SELECT 25 UNION SELECT 26 UNION SELECT 27 UNION SELECT 28 UNION SELECT 29) n
+            WHERE n.n &lt; #{days}
+        ) t
+        LEFT JOIN task_info ti ON DATE(ti.created_at) = t.date_day AND ti.deleted = 0
+        GROUP BY t.date_day ORDER BY t.date_day ASC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO task_info(task_name, task_code, scene_id, priority, device_count,
+            plan_start_time, plan_end_time, description, status, created_by, updated_by, created_at, updated_at)
+        VALUES(#{taskName}, #{taskCode}, #{sceneId}, #{priority}, #{deviceCount},
+            #{planStartTime}, #{planEndTime}, #{description}, #{status}, #{createdBy}, #{updatedBy}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE task_info
+        <set>
+            <if test="status != null">status = #{status},</if>
+            <if test="actualStartTime != null">actual_start_time = #{actualStartTime},</if>
+            <if test="actualEndTime != null">actual_end_time = #{actualEndTime},</if>
+            <if test="updatedBy != null">updated_by = #{updatedBy},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE task_info SET deleted = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE task_info SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+</mapper>

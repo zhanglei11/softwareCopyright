@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.iidp.system.process.mapper.ProcessExecutionMapper">
+    <resultMap id="ExecMap" type="com.sursoft.iidp.system.process.domain.ProcessExecution">
+        <id property="id" column="id"/>
+        <result property="execCode" column="exec_code"/>
+        <result property="taskId" column="task_id"/>
+        <result property="taskName" column="task_name"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="totalCount" column="total_count"/>
+        <result property="successCount" column="success_count"/>
+        <result property="failCount" column="fail_count"/>
+        <result property="outputSizeBytes" column="output_size_bytes"/>
+        <result property="executeStatus" column="execute_status"/>
+        <result property="failFileList" column="fail_file_list"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+    <select id="selectList" resultMap="ExecMap">
+        SELECT e.*, t.task_name FROM process_execution e
+        LEFT JOIN process_task t ON t.id = e.task_id
+        <where>
+            <if test="taskId != null">AND e.task_id = #{taskId}</if>
+            <if test="status != null and status != ''">AND e.execute_status = #{status}</if>
+        </where>
+        ORDER BY e.created_at DESC
+    </select>
+    <select id="selectById" resultMap="ExecMap">SELECT * FROM process_execution WHERE id = #{id}</select>
+    <select id="selectRunningByTaskId" resultMap="ExecMap">
+        SELECT * FROM process_execution WHERE task_id = #{taskId} AND execute_status = 'RUNNING' LIMIT 1
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO process_execution(exec_code,task_id,start_time,total_count,success_count,
+        fail_count,output_size_bytes,execute_status,fail_file_list)
+        VALUES(#{execCode},#{taskId},#{startTime},#{totalCount},#{successCount},
+        #{failCount},#{outputSizeBytes},#{executeStatus},#{failFileList})
+    </insert>
+    <update id="update">
+        UPDATE process_execution
+        <set>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="totalCount != null">total_count = #{totalCount},</if>
+            <if test="successCount != null">success_count = #{successCount},</if>
+            <if test="failCount != null">fail_count = #{failCount},</if>
+            <if test="executeStatus != null">execute_status = #{executeStatus},</if>
+            <if test="failFileList != null">fail_file_list = #{failFileList},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <select id="selectMaxCode" resultType="string">SELECT exec_code FROM process_execution ORDER BY id DESC LIMIT 1</select>
+</mapper>

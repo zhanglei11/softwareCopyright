@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.ai.system.mapper.UserSceneFavoriteMapper">
+    <select id="selectFavoritesByUserId" resultType="com.angu.ai.system.domain.vo.SceneVO">
+        SELECT s.id, s.name, s.category_id, c.name AS category_name,
+               s.icon, s.description, s.status, s.created_time
+        FROM user_scene_favorite f
+        INNER JOIN ai_scene s ON f.scene_id = s.id
+        LEFT JOIN ai_scene_category c ON s.category_id = c.id
+        WHERE f.user_id = #{userId} AND s.deleted = 0
+        ORDER BY f.created_time DESC
+    </select>
+    <select id="selectByUserAndScene" resultType="com.angu.ai.system.domain.entity.UserSceneFavorite">
+        SELECT * FROM user_scene_favorite WHERE user_id = #{userId} AND scene_id = #{sceneId}
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_scene_favorite (user_id, scene_id, created_time) VALUES (#{userId}, #{sceneId}, NOW())
+    </insert>
+    <delete id="deleteByUserAndScene">
+        DELETE FROM user_scene_favorite WHERE user_id = #{userId} AND scene_id = #{sceneId}
+    </delete>
+</mapper>

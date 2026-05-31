@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.vision.system.mapper.SysMenuMapper">
+
+    <resultMap id="menuMap" type="com.sursoft.vision.system.domain.SysMenu">
+        <id property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="menuName" column="menu_name"/>
+        <result property="menuType" column="menu_type"/>
+        <result property="path" column="path"/>
+        <result property="perms" column="perms"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="icon" column="icon"/>
+        <result property="isVisible" column="is_visible"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="menuMap">SELECT * FROM sys_menu WHERE id=#{id}</select>
+    <select id="selectAll" resultMap="menuMap">SELECT * FROM sys_menu ORDER BY order_num</select>
+    <select id="selectByRoleId" resultMap="menuMap">
+        SELECT m.* FROM sys_menu m INNER JOIN sys_role_menu rm ON m.id=rm.menu_id WHERE rm.role_id=#{roleId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_menu(parent_id,menu_name,menu_type,path,perms,order_num,icon,is_visible,created_at)
+        VALUES(#{parentId},#{menuName},#{menuType},#{path},#{perms},#{orderNum},#{icon},#{isVisible},NOW())
+    </insert>
+
+    <update id="updateById">
+        UPDATE sys_menu SET menu_name=#{menuName},menu_type=#{menuType},path=#{path},
+        perms=#{perms},order_num=#{orderNum},icon=#{icon},is_visible=#{isVisible} WHERE id=#{id}
+    </update>
+
+    <delete id="deleteById">DELETE FROM sys_menu WHERE id=#{id}</delete>
+</mapper>

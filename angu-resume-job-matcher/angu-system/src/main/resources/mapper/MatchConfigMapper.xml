@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.matcher.system.mapper.MatchConfigMapper">
+    <resultMap id="cfgMap" type="com.angu.matcher.system.domain.MatchConfig">
+        <id property="id" column="id"/>
+        <result property="skillWeight" column="skill_weight"/>
+        <result property="eduWeight" column="edu_weight"/>
+        <result property="expWeight" column="exp_weight"/>
+        <result property="updatedTime" column="updated_time"/>
+        <result property="updaterId" column="updater_id"/>
+    </resultMap>
+    <select id="selectOne" resultMap="cfgMap">
+        SELECT * FROM match_config LIMIT 1
+    </select>
+    <update id="updateConfig">
+        UPDATE match_config SET skill_weight=#{skillWeight},edu_weight=#{eduWeight},
+        exp_weight=#{expWeight},updated_time=NOW(),updater_id=#{updaterId}
+        WHERE id=#{id}
+    </update>
+</mapper>

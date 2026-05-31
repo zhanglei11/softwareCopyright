@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.iidp.system.ingest.mapper.IngestRecordMapper">
+    <resultMap id="RecordMap" type="com.sursoft.iidp.system.ingest.domain.IngestRecord">
+        <id property="id" column="id"/>
+        <result property="recordCode" column="record_code"/>
+        <result property="taskId" column="task_id"/>
+        <result property="taskName" column="task_name"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="costSeconds" column="cost_seconds"/>
+        <result property="ingestCount" column="ingest_count"/>
+        <result property="dataSizeBytes" column="data_size_bytes"/>
+        <result property="executeStatus" column="execute_status"/>
+        <result property="failReason" column="fail_reason"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+    <select id="selectList" resultMap="RecordMap">
+        SELECT r.*, t.task_name FROM ingest_record r
+        LEFT JOIN ingest_task t ON t.id = r.task_id
+        <where>
+            <if test="taskId != null">AND r.task_id = #{taskId}</if>
+            <if test="status != null and status != ''">AND r.execute_status = #{status}</if>
+        </where>
+        ORDER BY r.created_at DESC
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ingest_record(record_code,task_id,start_time,end_time,cost_seconds,
+        ingest_count,data_size_bytes,execute_status,fail_reason)
+        VALUES(#{recordCode},#{taskId},#{startTime},#{endTime},#{costSeconds},
+        #{ingestCount},#{dataSizeBytes},#{executeStatus},#{failReason})
+    </insert>
+    <select id="selectMaxCode" resultType="string">SELECT record_code FROM ingest_record ORDER BY id DESC LIMIT 1</select>
+    <select id="countToday" resultType="long">
+        SELECT COUNT(1) FROM ingest_record WHERE DATE(created_at) = CURDATE()
+    </select>
+    <select id="sumTodaySize" resultType="long">
+        SELECT IFNULL(SUM(data_size_bytes), 0) FROM ingest_record WHERE DATE(created_at) = CURDATE()
+    </select>
+    <select id="selectIngestTrend" resultType="map">
+        SELECT DATE(created_at) AS date, COUNT(1) AS count, IFNULL(SUM(data_size_bytes), 0) AS totalSize
+        FROM ingest_record
+        WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(created_at) ORDER BY date
+    </select>
+    <select id="selectStatusAnalysis" resultType="map">
+        SELECT execute_status AS status, COUNT(1) AS count FROM ingest_record GROUP BY execute_status
+    </select>
+    <select id="selectDatasourceContribution" resultType="map">
+        SELECT t.datasource_id, d.datasource_name AS datasourceName,
+               COUNT(r.id) AS ingestCount, IFNULL(SUM(r.data_size_bytes), 0) AS totalSize
+        FROM ingest_record r
+        LEFT JOIN ingest_task t ON t.id = r.task_id
+        LEFT JOIN datasource_config d ON d.id = t.datasource_id
+        GROUP BY t.datasource_id, d.datasource_name ORDER BY totalSize DESC
+    </select>
+</mapper>

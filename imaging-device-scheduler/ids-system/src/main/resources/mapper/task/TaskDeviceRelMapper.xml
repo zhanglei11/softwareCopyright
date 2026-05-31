@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.imaging.scheduler.system.mapper.task.TaskDeviceRelMapper">
+
+    <select id="selectByTaskId" resultType="com.imaging.scheduler.system.domain.task.TaskDeviceRel">
+        SELECT r.*, d.device_name, d.device_type FROM task_device_rel r
+        JOIN device_info d ON r.device_id = d.id
+        WHERE r.task_id = #{taskId} AND r.is_active = 1
+    </select>
+
+    <select id="selectActiveByDeviceId" resultType="com.imaging.scheduler.system.domain.task.TaskDeviceRel">
+        SELECT * FROM task_device_rel WHERE device_id = #{deviceId} AND is_active = 1
+    </select>
+
+    <insert id="insertBatch">
+        INSERT INTO task_device_rel(task_id, device_id, assign_time, is_active)
+        VALUES
+        <foreach collection="list" item="r" separator=",">
+            (#{r.taskId}, #{r.deviceId}, NOW(), 1)
+        </foreach>
+    </insert>
+
+    <update id="deactivateByTaskId">
+        UPDATE task_device_rel SET is_active = 0 WHERE task_id = #{taskId}
+    </update>
+
+    <select id="selectDeviceIdsByTaskId" resultType="long">
+        SELECT device_id FROM task_device_rel WHERE task_id = #{taskId} AND is_active = 1
+    </select>
+
+    <select id="selectActiveByTaskId" resultType="com.imaging.scheduler.system.domain.task.TaskDeviceRel">
+        SELECT r.*, d.device_name, d.device_type FROM task_device_rel r
+        JOIN device_info d ON r.device_id = d.id
+        WHERE r.task_id = #{taskId} AND r.is_active = 1
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO task_device_rel(task_id, device_id, assign_time, is_active)
+        VALUES(#{taskId}, #{deviceId}, NOW(), 1)
+    </insert>
+
+    <update id="releaseByTaskId">
+        UPDATE task_device_rel SET is_active = 0 WHERE task_id = #{taskId}
+    </update>
+
+    <select id="countActiveByDeviceId" resultType="int">
+        SELECT COUNT(1) FROM task_device_rel WHERE device_id = #{deviceId} AND is_active = 1
+    </select>
+</mapper>

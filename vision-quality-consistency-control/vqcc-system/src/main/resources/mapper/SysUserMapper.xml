@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vqcc.system.mapper.SysUserMapper">
+
+    <resultMap id="BaseResultMap" type="com.vqcc.system.domain.SysUser">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="real_name" property="realName"/>
+        <result column="phone" property="phone"/>
+        <result column="dept" property="dept"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT * FROM sys_user WHERE is_deleted = 0
+        <if test="username != null and username != ''">
+            AND username LIKE CONCAT('%', #{username}, '%')
+        </if>
+        <if test="realName != null and realName != ''">
+            AND real_name LIKE CONCAT('%', #{realName}, '%')
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY id DESC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM sys_user WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT * FROM sys_user WHERE username = #{username} AND is_deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (username, password, real_name, phone, dept, status, created_at, created_by, updated_at, updated_by)
+        VALUES (#{username}, #{password}, #{realName}, #{phone}, #{dept}, #{status},
+                NOW(), #{createdBy}, NOW(), #{createdBy})
+    </insert>
+
+    <update id="update">
+        UPDATE sys_user
+        <set>
+            updated_at = NOW(),
+            <if test="realName != null">real_name = #{realName},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="dept != null">dept = #{dept},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_by = #{updatedBy}
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE sys_user SET is_deleted = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="selectPermissionsByUserId" resultType="string">
+        SELECT DISTINCT m.permission
+        FROM sys_menu m
+        INNER JOIN sys_role_menu rm ON rm.menu_id = m.id
+        INNER JOIN sys_user_role ur ON ur.role_id = rm.role_id
+        WHERE ur.user_id = #{userId}
+          AND m.menu_type = 2
+          AND m.status = 1
+          AND m.permission IS NOT NULL AND m.permission != ''
+    </select>
+
+    <select id="selectRoleCodesByUserId" resultType="string">
+        SELECT r.role_code
+        FROM sys_role r
+        INNER JOIN sys_user_role ur ON ur.role_id = r.id
+        WHERE ur.user_id = #{userId} AND r.status = 1 AND r.is_deleted = 0
+    </select>
+</mapper>

@@ -1,0 +1,38 @@
+{
+  "name": "vision-defect-traceability-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode development --host",
+    "build": "vue-tsc --build && vite build --mode production",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --build"
+  },
+  "dependencies": {
+    "@ant-design/icons-vue": "^7.0.1",
+    "ant-design-vue": "^4.2.6",
+    "axios": "^1.16.1",
+    "dayjs": "^1.11.21",
+    "echarts": "^6.1.0",
+    "nprogress": "^0.2.0",
+    "pinia": "^3.0.4",
+    "vue-echarts": "^8.0.1",
+    "vue-i18n": "^11.4.4",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.4",
+    "@types/nprogress": "^0.2.3",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "@vue/tsconfig": "^0.8.1",
+    "sass-embedded": "^1.100.0",
+    "typescript": "~5.9.3",
+    "vite": "^7.3.3",
+    "vue": "^3.5.34",
+    "vue-tsc": "^3.3.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@parcel/watcher", "core-js", "esbuild"]
+  }
+}

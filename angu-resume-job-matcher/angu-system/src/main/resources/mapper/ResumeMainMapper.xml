@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.matcher.system.mapper.ResumeMainMapper">
+
+    <resultMap id="resumeMap" type="com.angu.matcher.system.domain.ResumeMain">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="gender" column="gender"/>
+        <result property="birthDate" column="birth_date"/>
+        <result property="city" column="city"/>
+        <result property="desiredPosition" column="desired_position"/>
+        <result property="desiredCity" column="desired_city"/>
+        <result property="desiredSalaryMin" column="desired_salary_min"/>
+        <result property="desiredSalaryMax" column="desired_salary_max"/>
+        <result property="jobStatus" column="job_status"/>
+        <result property="highestEdu" column="highest_edu"/>
+        <result property="totalExpYears" column="total_exp_years"/>
+        <result property="filePath" column="file_path"/>
+        <result property="parseSuccess" column="parse_success"/>
+        <result property="source" column="source"/>
+        <result property="selfIntro" column="self_intro"/>
+        <result property="deleted" column="deleted"/>
+        <result property="creatorId" column="creator_id"/>
+        <result property="createdTime" column="created_time"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="resumeMap">
+        SELECT DISTINCT r.* FROM resume_main r
+        <if test="skill != null and skill != ''">
+            LEFT JOIN resume_skill rs ON r.id = rs.resume_id
+        </if>
+        WHERE r.deleted = 0
+        <if test="name != null and name != ''">AND r.name LIKE CONCAT('%',#{name},'%')</if>
+        <if test="phone != null and phone != ''">AND r.phone LIKE CONCAT('%',#{phone},'%')</if>
+        <if test="highestEdu != null and highestEdu != ''">AND r.highest_edu = #{highestEdu}</if>
+        <if test="source != null and source != ''">AND r.source = #{source}</if>
+        <if test="skill != null and skill != ''">AND rs.skill_name LIKE CONCAT('%',#{skill},'%')</if>
+        ORDER BY r.created_time DESC
+    </select>
+
+    <select id="selectById" resultMap="resumeMap">
+        SELECT * FROM resume_main WHERE id=#{id} AND deleted=0
+    </select>
+
+    <select id="selectAllValid" resultMap="resumeMap">
+        SELECT * FROM resume_main WHERE deleted=0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO resume_main(name,phone,email,gender,birth_date,city,desired_position,
+        desired_city,desired_salary_min,desired_salary_max,job_status,highest_edu,
+        total_exp_years,file_path,parse_success,source,self_intro,deleted,creator_id,created_time)
+        VALUES(#{name},#{phone},#{email},#{gender},#{birthDate},#{city},#{desiredPosition},
+        #{desiredCity},#{desiredSalaryMin},#{desiredSalaryMax},#{jobStatus},#{highestEdu},
+        #{totalExpYears},#{filePath},#{parseSuccess},#{source},#{selfIntro},0,#{creatorId},NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE resume_main SET name=#{name},phone=#{phone},email=#{email},gender=#{gender},
+        birth_date=#{birthDate},city=#{city},desired_position=#{desiredPosition},
+        desired_city=#{desiredCity},desired_salary_min=#{desiredSalaryMin},
+        desired_salary_max=#{desiredSalaryMax},job_status=#{jobStatus},
+        highest_edu=#{highestEdu},total_exp_years=#{totalExpYears},self_intro=#{selfIntro}
+        WHERE id=#{id} AND deleted=0
+    </update>
+
+    <update id="deleteById">
+        UPDATE resume_main SET deleted=1 WHERE id=#{id}
+    </update>
+
+    <update id="updateFilePath">
+        UPDATE resume_main SET file_path=#{filePath}, parse_success=#{parseSuccess} WHERE id=#{id}
+    </update>
+
+</mapper>

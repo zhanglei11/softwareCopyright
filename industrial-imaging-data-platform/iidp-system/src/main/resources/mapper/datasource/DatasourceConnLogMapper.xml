@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.iidp.system.datasource.mapper.DatasourceConnLogMapper">
+    <resultMap id="ConnLogMap" type="com.sursoft.iidp.system.datasource.domain.DatasourceConnLog">
+        <id property="id" column="id"/>
+        <result property="datasourceId" column="datasource_id"/>
+        <result property="result" column="result"/>
+        <result property="errorMsg" column="error_msg"/>
+        <result property="costTime" column="cost_time"/>
+        <result property="testedAt" column="tested_at"/>
+        <result property="testedBy" column="tested_by"/>
+    </resultMap>
+    <select id="selectListByDsId" resultMap="ConnLogMap">
+        SELECT * FROM datasource_conn_log WHERE datasource_id = #{dsId} ORDER BY tested_at DESC
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO datasource_conn_log(datasource_id, result, error_msg, cost_time, tested_at, tested_by)
+        VALUES(#{datasourceId}, #{result}, #{errorMsg}, #{costTime}, #{testedAt}, #{testedBy})
+    </insert>
+</mapper>

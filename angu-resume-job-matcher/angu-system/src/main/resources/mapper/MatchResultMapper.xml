@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.matcher.system.mapper.MatchResultMapper">
+    <resultMap id="mrMap" type="com.angu.matcher.system.domain.MatchResult">
+        <id property="id" column="id"/>
+        <result property="positionId" column="position_id"/>
+        <result property="resumeId" column="resume_id"/>
+        <result property="totalScore" column="total_score"/>
+        <result property="skillScore" column="skill_score"/>
+        <result property="eduScore" column="edu_score"/>
+        <result property="expScore" column="exp_score"/>
+        <result property="matchedAt" column="matched_at"/>
+        <result property="resumeName" column="resume_name"/>
+        <result property="resumePhone" column="resume_phone"/>
+    </resultMap>
+    <select id="selectByPositionId" resultMap="mrMap">
+        SELECT mr.*, r.name as resume_name, r.phone as resume_phone
+        FROM match_result mr LEFT JOIN resume_main r ON mr.resume_id = r.id
+        WHERE mr.position_id=#{positionId}
+        ORDER BY mr.total_score DESC
+    </select>
+    <insert id="insertBatch">
+        INSERT INTO match_result(position_id,resume_id,total_score,skill_score,edu_score,exp_score,matched_at)
+        VALUES
+        <foreach collection="list" item="r" separator=",">
+            (#{r.positionId},#{r.resumeId},#{r.totalScore},#{r.skillScore},#{r.eduScore},#{r.expScore},NOW())
+        </foreach>
+    </insert>
+    <delete id="deleteByPositionId">DELETE FROM match_result WHERE position_id=#{positionId}</delete>
+</mapper>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.sfd.system.mapper.DatasourceConfigMapper">
+    <resultMap id="BaseResultMap" type="com.sursoft.sfd.system.domain.DatasourceConfig">
+        <id column="id" property="id"/>
+        <result column="ds_code" property="dsCode"/>
+        <result column="ds_name" property="dsName"/>
+        <result column="scene_type" property="sceneType"/>
+        <result column="ds_type" property="dsType"/>
+        <result column="conn_host" property="connHost"/>
+        <result column="conn_port" property="connPort"/>
+        <result column="auth_type" property="authType"/>
+        <result column="auth_config" property="authConfig"/>
+        <result column="field_mapping" property="fieldMapping"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="remark" property="remark"/>
+        <result column="conn_status" property="connStatus"/>
+        <result column="last_data_time" property="lastDataTime"/>
+    </resultMap>
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT d.*, ds.conn_status, ds.last_data_time
+        FROM datasource_config d
+        LEFT JOIN (
+            SELECT ds_id, conn_status, last_data_time
+            FROM datasource_status
+            WHERE id IN (SELECT MAX(id) FROM datasource_status GROUP BY ds_id)
+        ) ds ON d.id = ds.ds_id
+        WHERE d.is_deleted = 0
+        <if test="sceneType != null and sceneType != ''">AND d.scene_type = #{sceneType}</if>
+        <if test="dsType != null and dsType != ''">AND d.ds_type = #{dsType}</if>
+        <if test="status != null">AND d.status = #{status}</if>
+        <if test="keyword != null and keyword != ''">AND d.ds_name LIKE CONCAT('%',#{keyword},'%')</if>
+        ORDER BY d.created_at DESC
+    </select>
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM datasource_config WHERE id = #{id} AND is_deleted = 0
+    </select>
+    <select id="selectAllEnabled" resultMap="BaseResultMap">
+        SELECT * FROM datasource_config WHERE status = 1 AND is_deleted = 0
+    </select>
+    <insert id="insert">
+        INSERT INTO datasource_config (id,ds_code,ds_name,scene_type,ds_type,conn_host,conn_port,
+            auth_type,auth_config,field_mapping,status,is_deleted,created_at,created_by,remark)
+        VALUES (#{id},#{dsCode},#{dsName},#{sceneType},#{dsType},#{connHost},#{connPort},
+            #{authType},#{authConfig},#{fieldMapping},#{status},0,NOW(),#{createdBy},#{remark})
+    </insert>
+    <update id="update">
+        UPDATE datasource_config SET ds_name=#{dsName},scene_type=#{sceneType},ds_type=#{dsType},
+        conn_host=#{connHost},conn_port=#{connPort},auth_type=#{authType},auth_config=#{authConfig},
+        field_mapping=#{fieldMapping},remark=#{remark},updated_at=NOW(),updated_by=#{updatedBy}
+        WHERE id=#{id}
+    </update>
+    <update id="updateStatus">
+        UPDATE datasource_config SET status=#{status},updated_at=NOW(),updated_by=#{updatedBy} WHERE id=#{id}
+    </update>
+    <update id="deleteById">
+        UPDATE datasource_config SET is_deleted=1,updated_at=NOW(),updated_by=#{updatedBy} WHERE id=#{id}
+    </update>
+</mapper>

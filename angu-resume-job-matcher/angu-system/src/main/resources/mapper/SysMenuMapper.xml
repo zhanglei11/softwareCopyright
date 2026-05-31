@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.matcher.system.mapper.SysMenuMapper">
+
+    <resultMap id="menuMap" type="com.angu.matcher.system.domain.SysMenu">
+        <id property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="menuType" column="menu_type"/>
+        <result property="menuName" column="menu_name"/>
+        <result property="path" column="path"/>
+        <result property="permCode" column="perm_code"/>
+        <result property="icon" column="icon"/>
+        <result property="sort" column="sort"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="menuMap">
+        SELECT * FROM sys_menu ORDER BY parent_id, sort
+    </select>
+
+    <select id="selectById" resultMap="menuMap">
+        SELECT * FROM sys_menu WHERE id = #{id}
+    </select>
+
+    <select id="countChildrenByParentId" resultType="int">
+        SELECT COUNT(*) FROM sys_menu WHERE parent_id = #{parentId}
+    </select>
+
+    <select id="selectMenusByUserId" resultMap="menuMap">
+        SELECT DISTINCT m.* FROM sys_menu m
+        INNER JOIN sys_role_menu rm ON m.id = rm.menu_id
+        INNER JOIN sys_user_role ur ON rm.role_id = ur.role_id
+        WHERE ur.user_id = #{userId}
+        ORDER BY m.parent_id, m.sort
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_menu(parent_id, menu_type, menu_name, path, perm_code, icon, sort)
+        VALUES(#{parentId}, #{menuType}, #{menuName}, #{path}, #{permCode}, #{icon}, #{sort})
+    </insert>
+
+    <update id="update">
+        UPDATE sys_menu SET parent_id=#{parentId}, menu_type=#{menuType}, menu_name=#{menuName},
+        path=#{path}, perm_code=#{permCode}, icon=#{icon}, sort=#{sort}
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sys_menu WHERE id=#{id}
+    </delete>
+
+</mapper>

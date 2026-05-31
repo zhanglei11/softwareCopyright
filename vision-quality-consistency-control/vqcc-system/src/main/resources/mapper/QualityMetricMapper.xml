@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vqcc.system.mapper.QualityMetricMapper">
+
+    <resultMap id="BaseResultMap" type="com.vqcc.system.domain.QualityMetric">
+        <id column="id" property="id"/>
+        <result column="metric_code" property="metricCode"/>
+        <result column="metric_name" property="metricName"/>
+        <result column="metric_type" property="metricType"/>
+        <result column="unit" property="unit"/>
+        <result column="min_value" property="minValue"/>
+        <result column="max_value" property="maxValue"/>
+        <result column="level_desc" property="levelDesc"/>
+        <result column="importance" property="importance"/>
+        <result column="remark" property="remark"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT * FROM quality_metric WHERE is_deleted = 0
+        <if test="metricName != null and metricName != ''">
+            AND metric_name LIKE CONCAT('%', #{metricName}, '%')
+        </if>
+        <if test="metricType != null">
+            AND metric_type = #{metricType}
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY id ASC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM quality_metric WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByTemplateId" resultMap="BaseResultMap">
+        SELECT m.* FROM quality_metric m
+        INNER JOIN quality_template_metric tm ON tm.metric_id = m.id
+        WHERE tm.template_id = #{templateId} AND m.is_deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quality_metric (metric_code, metric_name, metric_type, unit, min_value, max_value,
+            level_desc, importance, remark, status, created_at, created_by, updated_at, updated_by)
+        VALUES (#{metricCode}, #{metricName}, #{metricType}, #{unit}, #{minValue}, #{maxValue},
+                #{levelDesc}, #{importance}, #{remark}, #{status}, NOW(), #{createdBy}, NOW(), #{createdBy})
+    </insert>
+
+    <update id="update">
+        UPDATE quality_metric
+        <set>
+            updated_at = NOW(),
+            <if test="metricName != null">metric_name = #{metricName},</if>
+            <if test="metricType != null">metric_type = #{metricType},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            <if test="minValue != null">min_value = #{minValue},</if>
+            <if test="maxValue != null">max_value = #{maxValue},</if>
+            <if test="levelDesc != null">level_desc = #{levelDesc},</if>
+            <if test="importance != null">importance = #{importance},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_by = #{updatedBy}
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE quality_metric SET is_deleted = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="selectMaxCode" resultType="string">
+        SELECT metric_code FROM quality_metric ORDER BY id DESC LIMIT 1
+    </select>
+</mapper>

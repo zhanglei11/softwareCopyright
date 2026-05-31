@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.vision.system.mapper.DefectImageMapper">
+    <resultMap id="RM" type="com.sursoft.vision.system.domain.DefectImage">
+        <id property="id" column="id"/>
+        <result property="recordId" column="record_id"/>
+        <result property="imageUrl" column="image_url"/>
+        <result property="annotations" column="annotations"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+    <select id="selectByRecordId" resultMap="RM">SELECT * FROM defect_image WHERE record_id=#{recordId}</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO defect_image(record_id,image_url,annotations,created_at) VALUES(#{recordId},#{imageUrl},#{annotations},NOW())
+    </insert>
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.ai.system.mapper.AiMessageMapper">
+
+    <select id="selectByConversationId" resultType="com.angu.ai.system.domain.vo.MessageVO">
+        SELECT id, role, content, token_count, created_time
+        FROM ai_message WHERE conversation_id = #{conversationId}
+        ORDER BY created_time ASC
+    </select>
+
+    <select id="selectEntityByConversationId" resultType="com.angu.ai.system.domain.entity.AiMessage">
+        SELECT * FROM ai_message WHERE conversation_id = #{conversationId} ORDER BY created_time ASC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_message (conversation_id, role, content, token_count, created_time)
+        VALUES (#{conversationId}, #{role}, #{content}, #{tokenCount}, NOW())
+    </insert>
+
+    <insert id="batchInsert">
+        INSERT INTO ai_message (conversation_id, role, content, token_count, created_time)
+        VALUES
+        <foreach collection="messages" item="m" separator=",">
+            (#{m.conversationId}, #{m.role}, #{m.content}, #{m.tokenCount}, NOW())
+        </foreach>
+    </insert>
+</mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sva.system.mapper.RecognitionTaskMapper">
+    <resultMap id="BaseRM" type="com.sva.system.domain.RecognitionTask">
+        <id column="id" property="id"/>
+        <result column="task_no" property="taskNo"/>
+        <result column="task_name" property="taskName"/>
+        <result column="model_version_id" property="modelVersionId"/>
+        <result column="model_version_no" property="modelVersionNo"/>
+        <result column="confidence_threshold" property="confidenceThreshold"/>
+        <result column="select_mode" property="selectMode"/>
+        <result column="total_count" property="totalCount"/>
+        <result column="processed_count" property="processedCount"/>
+        <result column="success_count" property="successCount"/>
+        <result column="fail_count" property="failCount"/>
+        <result column="avg_confidence" property="avgConfidence"/>
+        <result column="status" property="status"/>
+        <result column="fail_reason" property="failReason"/>
+        <result column="started_at" property="startedAt"/>
+        <result column="finished_at" property="finishedAt"/>
+        <result column="remark" property="remark"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+    <select id="selectList" resultMap="BaseRM">
+        SELECT * FROM recognition_task WHERE 1=1
+        <if test="taskName != null and taskName != ''">AND task_name LIKE CONCAT('%',#{taskName},'%')</if>
+        <if test="status != null">AND status=#{status}</if>
+        <if test="modelVersionId != null">AND model_version_id=#{modelVersionId}</if>
+        ORDER BY created_at DESC
+    </select>
+    <select id="selectById" resultMap="BaseRM">SELECT * FROM recognition_task WHERE id=#{id}</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO recognition_task(task_no,task_name,model_version_id,model_version_no,confidence_threshold,
+            select_mode,total_count,processed_count,success_count,fail_count,status,remark,created_by,created_at,updated_at)
+        VALUES(#{taskNo},#{taskName},#{modelVersionId},#{modelVersionNo},#{confidenceThreshold},
+            #{selectMode},#{totalCount},0,0,0,0,#{remark},#{createdBy},NOW(),NOW())
+    </insert>
+    <update id="update">
+        UPDATE recognition_task SET status=#{status},processed_count=#{processedCount},
+            success_count=#{successCount},fail_count=#{failCount},
+            started_at=#{startedAt},finished_at=#{finishedAt},updated_at=NOW()
+        WHERE id=#{id}
+    </update>
+    <delete id="deleteById">DELETE FROM recognition_task WHERE id=#{id}</delete>
+    <insert id="insertTaskImageRels">
+        INSERT INTO task_image_rel(task_id,image_id,result_status) VALUES
+        <foreach collection="imageIds" item="iid" separator=",">(#{taskId},#{iid},0)</foreach>
+    </insert>
+    <select id="selectImageIdsByTaskId" resultType="long">SELECT image_id FROM task_image_rel WHERE task_id=#{taskId}</select>
+</mapper>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.sfd.system.mapper.FusionResultMapper">
+    <resultMap id="RM" type="com.sursoft.sfd.system.domain.FusionResult">
+        <id column="id" property="id"/>
+        <result column="result_code" property="resultCode"/>
+        <result column="scheme_id" property="schemeId"/>
+        <result column="scheme_name" property="schemeName"/>
+        <result column="scene_count" property="sceneCount"/>
+        <result column="data_record_count" property="dataRecordCount"/>
+        <result column="result_status" property="resultStatus"/>
+        <result column="error_msg" property="errorMsg"/>
+        <result column="raw_data_summary" property="rawDataSummary"/>
+        <result column="fusion_data" property="fusionData"/>
+        <result column="executed_at" property="executedAt"/>
+        <result column="created_by" property="createdBy"/>
+    </resultMap>
+    <select id="selectList" resultMap="RM">
+        SELECT * FROM fusion_result WHERE 1=1
+        <if test="schemeId != null">AND scheme_id=#{schemeId}</if>
+        <if test="resultStatus != null">AND result_status=#{resultStatus}</if>
+        <if test="startTime != null and startTime != ''">AND executed_at &gt;= #{startTime}</if>
+        <if test="endTime != null and endTime != ''">AND executed_at &lt;= #{endTime}</if>
+        ORDER BY executed_at DESC
+    </select>
+    <select id="selectById" resultMap="RM">SELECT * FROM fusion_result WHERE id=#{id}</select>
+    <insert id="insert">
+        INSERT INTO fusion_result(id,result_code,scheme_id,scheme_name,scene_count,data_record_count,
+        result_status,error_msg,raw_data_summary,fusion_data,executed_at,created_by)
+        VALUES(#{id},#{resultCode},#{schemeId},#{schemeName},#{sceneCount},#{dataRecordCount},
+        #{resultStatus},#{errorMsg},#{rawDataSummary},#{fusionData},NOW(),#{createdBy})
+    </insert>
+    <select id="countByDateRange" resultType="long">
+        SELECT COUNT(*) FROM fusion_result WHERE 1=1
+        <if test="schemeId != null">AND scheme_id=#{schemeId}</if>
+        <if test="startTime != null and startTime != ''">AND executed_at &gt;= #{startTime}</if>
+        <if test="endTime != null and endTime != ''">AND executed_at &lt;= #{endTime}</if>
+    </select>
+    <select id="countTrendByDay" resultType="map">
+        SELECT DATE(executed_at) AS dt, COUNT(*) AS cnt,
+               SUM(CASE WHEN result_status=1 THEN 1 ELSE 0 END) AS success_cnt
+        FROM fusion_result WHERE 1=1
+        <if test="schemeId != null">AND scheme_id=#{schemeId}</if>
+        <if test="startTime != null and startTime != ''">AND executed_at &gt;= #{startTime}</if>
+        <if test="endTime != null and endTime != ''">AND executed_at &lt;= #{endTime}</if>
+        GROUP BY DATE(executed_at) ORDER BY dt ASC
+    </select>
+    <select id="countBySceneType" resultType="map">
+        SELECT scene_count, COUNT(*) AS cnt FROM fusion_result
+        WHERE 1=1
+        <if test="startTime != null and startTime != ''">AND executed_at &gt;= #{startTime}</if>
+        <if test="endTime != null and endTime != ''">AND executed_at &lt;= #{endTime}</if>
+        GROUP BY scene_count
+    </select>
+</mapper>

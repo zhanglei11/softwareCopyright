@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vqcc.system.mapper.SysRoleMapper">
+    <resultMap id="BaseResultMap" type="com.vqcc.system.domain.SysRole">
+        <id column="id" property="id"/>
+        <result column="role_name" property="roleName"/>
+        <result column="role_code" property="roleCode"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+    </resultMap>
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT * FROM sys_role WHERE is_deleted = 0
+        <if test="roleName != null and roleName != ''">AND role_name LIKE CONCAT('%',#{roleName},'%')</if>
+        <if test="status != null">AND status = #{status}</if>
+        ORDER BY id ASC
+    </select>
+    <select id="selectById" resultMap="BaseResultMap">SELECT * FROM sys_role WHERE id=#{id} AND is_deleted=0</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_role (role_name,role_code,description,status,created_at,created_by,updated_at,updated_by)
+        VALUES (#{roleName},#{roleCode},#{description},#{status},NOW(),#{createdBy},NOW(),#{createdBy})
+    </insert>
+    <update id="update">
+        UPDATE sys_role <set>updated_at=NOW(),
+        <if test="roleName!=null">role_name=#{roleName},</if>
+        <if test="description!=null">description=#{description},</if>
+        <if test="status!=null">status=#{status},</if>
+        updated_by=#{updatedBy}</set> WHERE id=#{id} AND is_deleted=0
+    </update>
+    <update id="deleteById">UPDATE sys_role SET is_deleted=1,updated_at=NOW() WHERE id=#{id}</update>
+    <insert id="assignMenus">
+        INSERT INTO sys_role_menu (role_id,menu_id) VALUES
+        <foreach collection="menuIds" item="menuId" separator=",">
+            (#{roleId},#{menuId})
+        </foreach>
+    </insert>
+    <delete id="deleteRoleMenus">DELETE FROM sys_role_menu WHERE role_id=#{roleId}</delete>
+    <select id="selectMenuIdsByRoleId" resultType="long">
+        SELECT menu_id FROM sys_role_menu WHERE role_id=#{roleId}
+    </select>
+</mapper>

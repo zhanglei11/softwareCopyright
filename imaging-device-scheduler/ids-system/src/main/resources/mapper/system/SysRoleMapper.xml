@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.imaging.scheduler.system.mapper.system.SysRoleMapper">
+
+    <select id="selectList" resultType="com.imaging.scheduler.system.domain.system.SysRole">
+        SELECT * FROM sys_role WHERE deleted = 0 ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectById" resultType="com.imaging.scheduler.system.domain.system.SysRole">
+        SELECT * FROM sys_role WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectByUserId" resultType="com.imaging.scheduler.system.domain.system.SysRole">
+        SELECT r.* FROM sys_role r
+        JOIN sys_user_role ur ON r.id = ur.role_id
+        WHERE ur.user_id = #{userId} AND r.deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_role(role_name, role_code, description, status, sort_order, created_by, updated_by, created_at, updated_at)
+        VALUES(#{roleName}, #{roleCode}, #{description}, #{status}, #{sortOrder}, #{createdBy}, #{updatedBy}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE sys_role
+        <set>
+            <if test="roleName != null">role_name = #{roleName},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updatedBy != null">updated_by = #{updatedBy},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE sys_role SET deleted = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="deleteUserRole">
+        DELETE FROM sys_user_role WHERE user_id = #{userId}
+    </delete>
+
+    <insert id="insertUserRoles">
+        INSERT INTO sys_user_role(user_id, role_id) VALUES
+        <foreach collection="roleIds" item="roleId" separator=",">
+            (#{userId}, #{roleId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteRoleMenus">
+        DELETE FROM sys_role_menu WHERE role_id = #{roleId}
+    </delete>
+
+    <insert id="insertRoleMenus">
+        INSERT INTO sys_role_menu(role_id, menu_id) VALUES
+        <foreach collection="menuIds" item="menuId" separator=",">
+            (#{roleId}, #{menuId})
+        </foreach>
+    </insert>
+
+    <select id="selectMenuIdsByRoleId" resultType="long">
+        SELECT menu_id FROM sys_role_menu WHERE role_id = #{roleId}
+    </select>
+
+    <select id="countUsersByRoleId" resultType="int">
+        SELECT COUNT(1) FROM sys_user_role WHERE role_id = #{roleId}
+    </select>
+
+    <delete id="deleteUserRoleByRoleId">
+        DELETE FROM sys_user_role WHERE role_id = #{roleId}
+    </delete>
+
+    <delete id="deleteMenuRoleByRoleId">
+        DELETE FROM sys_role_menu WHERE role_id = #{roleId}
+    </delete>
+
+    <delete id="deleteUserRoleByUserId">
+        DELETE FROM sys_user_role WHERE user_id = #{userId}
+    </delete>
+</mapper>

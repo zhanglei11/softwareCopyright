@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vqcc.system.mapper.QualityTemplateMapper">
+
+    <resultMap id="BaseResultMap" type="com.vqcc.system.domain.QualityTemplate">
+        <id column="id" property="id"/>
+        <result column="template_code" property="templateCode"/>
+        <result column="template_name" property="templateName"/>
+        <result column="applicable_scene" property="applicableScene"/>
+        <result column="remark" property="remark"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="metric_count" property="metricCount"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT t.*,
+               (SELECT COUNT(*) FROM quality_template_metric tm WHERE tm.template_id = t.id) AS metric_count
+        FROM quality_template t WHERE t.is_deleted = 0
+        <if test="templateName != null and templateName != ''">
+            AND t.template_name LIKE CONCAT('%', #{templateName}, '%')
+        </if>
+        <if test="status != null">AND t.status = #{status}</if>
+        ORDER BY t.id DESC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM quality_template WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quality_template (template_code, template_name, applicable_scene, remark, status,
+            created_at, created_by, updated_at, updated_by)
+        VALUES (#{templateCode}, #{templateName}, #{applicableScene}, #{remark}, #{status},
+                NOW(), #{createdBy}, NOW(), #{createdBy})
+    </insert>
+
+    <update id="update">
+        UPDATE quality_template
+        <set>
+            updated_at = NOW(),
+            <if test="templateName != null">template_name = #{templateName},</if>
+            <if test="applicableScene != null">applicable_scene = #{applicableScene},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="status != null">status = #{status},</if>
+            updated_by = #{updatedBy}
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE quality_template SET is_deleted = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <insert id="insertTemplateMetrics">
+        INSERT INTO quality_template_metric (template_id, metric_id) VALUES
+        <foreach collection="metricIds" item="metricId" separator=",">
+            (#{templateId}, #{metricId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteTemplateMetrics">
+        DELETE FROM quality_template_metric WHERE template_id = #{templateId}
+    </delete>
+
+    <select id="selectMaxCode" resultType="string">
+        SELECT template_code FROM quality_template ORDER BY id DESC LIMIT 1
+    </select>
+</mapper>

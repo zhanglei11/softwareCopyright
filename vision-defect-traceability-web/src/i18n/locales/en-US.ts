@@ -1,0 +1,18 @@
+export default {
+  common_search: 'Search', common_reset: 'Reset', common_add: 'Add',
+  common_edit: 'Edit', common_delete: 'Delete', common_save: 'Save',
+  common_cancel: 'Cancel', common_confirm: 'Confirm', common_export: 'Export',
+  common_status: 'Status', common_all: 'All', common_normal: 'Normal',
+  common_disabled: 'Disabled', common_operation: 'Operation',
+  common_keyword: 'Keyword', common_createTime: 'Created At', common_remark: 'Remark',
+  menu_login: 'Login', menu_dashboard: 'Dashboard', menu_profile: 'Profile',
+  menu_defect: 'Defect', menu_defectRecord: 'Defect Records',
+  menu_defectCategory: 'Defect Categories',
+  menu_line: 'Lines', menu_lineManage: 'Line Info', menu_product: 'Product Types',
+  menu_alert: 'Alert', menu_alertRule: 'Alert Rules', menu_alertRecord: 'Alert Records',
+  menu_stats: 'Statistics', menu_trace: 'Trace Query',
+  menu_system: 'System', menu_systemUser: 'Users', menu_systemRole: 'Roles',
+  login_title: 'Vision Defect Traceability System',
+  login_username: 'Username', login_password: 'Password', login_submit: 'Login',
+  login_usernamePlaceholder: 'Enter username', login_passwordPlaceholder: 'Enter password',
+}

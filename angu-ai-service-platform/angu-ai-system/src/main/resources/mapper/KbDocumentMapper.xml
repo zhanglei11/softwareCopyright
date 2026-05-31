@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.ai.system.mapper.KbDocumentMapper">
+    <select id="selectByKbId" resultType="com.angu.ai.system.domain.entity.KbDocument">
+        SELECT * FROM kb_document WHERE kb_id = #{kbId} AND deleted = 0 ORDER BY created_time DESC
+    </select>
+    <select id="selectById" resultType="com.angu.ai.system.domain.entity.KbDocument">
+        SELECT * FROM kb_document WHERE id = #{id} AND deleted = 0
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO kb_document (kb_id, file_name, file_path, file_size, file_type, parse_status, deleted, created_time)
+        VALUES (#{kbId}, #{fileName}, #{filePath}, #{fileSize}, #{fileType}, 'PENDING', 0, NOW())
+    </insert>
+    <update id="updateById">
+        UPDATE kb_document
+        <set>
+            <if test="parseStatus != null">parse_status = #{parseStatus},</if>
+            <if test="chunkCount != null">chunk_count = #{chunkCount},</if>
+            <if test="errorMsg != null">error_msg = #{errorMsg},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <update id="deleteById">
+        UPDATE kb_document SET deleted = 1 WHERE id = #{id}
+    </update>
+    <select id="countByKbId" resultType="int">
+        SELECT COUNT(*) FROM kb_document WHERE kb_id = #{kbId} AND deleted = 0
+    </select>
+
+
+    <update id="updateParseStatus">
+        UPDATE kb_document
+        SET parse_status = #{status},
+            error_msg = #{errorMsg},
+            updated_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>

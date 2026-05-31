@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vqcc.system.mapper.QualityAgentMapper">
+
+    <resultMap id="BaseResultMap" type="com.vqcc.system.domain.QualityAgent">
+        <id column="id" property="id"/>
+        <result column="agent_name"      property="agentName"/>
+        <result column="agent_code"      property="agentCode"/>
+        <result column="agent_type"      property="agentType"/>
+        <result column="endpoint_url"    property="endpointUrl"/>
+        <result column="auth_token"      property="authToken"/>
+        <result column="status"          property="status"/>
+        <result column="last_heartbeat"  property="lastHeartbeat"/>
+        <result column="remark"          property="remark"/>
+        <result column="is_deleted"      property="isDeleted"/>
+        <result column="created_at"      property="createdAt"/>
+        <result column="created_by"      property="createdBy"/>
+        <result column="updated_at"      property="updatedAt"/>
+        <result column="updated_by"      property="updatedBy"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT * FROM quality_agent
+        WHERE is_deleted = 0
+        <if test="agentName != null and agentName != ''">
+            AND agent_name LIKE CONCAT('%', #{agentName}, '%')
+        </if>
+        <if test="agentType != null">AND agent_type = #{agentType}</if>
+        <if test="status != null">AND status = #{status}</if>
+        ORDER BY id DESC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM quality_agent WHERE id = #{id} AND is_deleted = 0
+    </select>
+
+    <select id="selectByCode" resultMap="BaseResultMap">
+        SELECT * FROM quality_agent WHERE agent_code = #{agentCode} AND is_deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quality_agent
+        (agent_name, agent_code, agent_type, endpoint_url, auth_token, status, remark,
+         is_deleted, created_at, created_by, updated_at, updated_by)
+        VALUES
+        (#{agentName}, #{agentCode}, #{agentType}, #{endpointUrl}, #{authToken}, 1, #{remark},
+         0, NOW(), #{createdBy}, NOW(), #{createdBy})
+    </insert>
+
+    <update id="update">
+        UPDATE quality_agent
+        <set>
+            updated_at = NOW(),
+            <if test="agentName != null">agent_name = #{agentName},</if>
+            <if test="agentType != null">agent_type = #{agentType},</if>
+            <if test="endpointUrl != null">endpoint_url = #{endpointUrl},</if>
+            <if test="authToken != null">auth_token = #{authToken},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            updated_by = #{updatedBy}
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE quality_agent SET is_deleted = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="updateHeartbeat">
+        UPDATE quality_agent
+        SET status = #{status}, last_heartbeat = NOW(), updated_at = NOW()
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+</mapper>

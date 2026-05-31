@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.imaging.scheduler.system.mapper.device.DeviceFaultRecordMapper">
+
+    <select id="selectByDeviceId" resultType="com.imaging.scheduler.system.domain.device.DeviceFaultRecord">
+        SELECT * FROM device_fault_record WHERE device_id = #{deviceId} ORDER BY fault_time DESC
+    </select>
+
+    <select id="selectFaultStat" resultType="map">
+        SELECT d.device_name, COUNT(f.id) AS faultCount,
+               MAX(f.fault_time) AS lastFaultTime
+        FROM device_fault_record f
+        JOIN device_info d ON f.device_id = d.id
+        WHERE f.fault_time >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+        GROUP BY d.id, d.device_name
+        ORDER BY faultCount DESC
+        LIMIT 10
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO device_fault_record(device_id, fault_type, fault_desc, fault_time, resolved_time, resolved_by, created_at)
+        VALUES(#{deviceId}, #{faultType}, #{faultDesc}, #{faultTime}, #{resolvedTime}, #{resolvedBy}, NOW())
+    </insert>
+</mapper>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.ai.system.mapper.AiCallLogMapper">
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_call_log (user_id, scene_id, model_id, conversation_id,
+                                  prompt_tokens, completion_tokens, total_tokens,
+                                  latency_ms, success, error_msg, call_time)
+        VALUES (#{userId}, #{sceneId}, #{modelId}, #{conversationId},
+                #{promptTokens}, #{completionTokens}, #{totalTokens},
+                #{latencyMs}, #{success}, #{errorMsg}, #{callTime})
+    </insert>
+
+    <select id="countToday" resultType="long">
+        SELECT COUNT(*) FROM ai_call_log WHERE DATE(call_time) = CURDATE()
+    </select>
+
+    <select id="countThisMonth" resultType="long">
+        SELECT COUNT(*) FROM ai_call_log WHERE DATE_FORMAT(call_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+    </select>
+
+    <select id="countActiveUsersThisMonth" resultType="long">
+        SELECT COUNT(DISTINCT user_id) FROM ai_call_log
+        WHERE DATE_FORMAT(call_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+    </select>
+
+    <select id="dailyTrend" resultType="map">
+        SELECT DATE(call_time) AS date, COUNT(*) AS count
+        FROM ai_call_log
+        WHERE call_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(call_time)
+        ORDER BY date ASC
+    </select>
+
+    <select id="sceneDistributionTop10" resultType="map">
+        SELECT s.name AS scene_name, COUNT(l.id) AS call_count
+        FROM ai_call_log l
+        LEFT JOIN ai_scene s ON l.scene_id = s.id
+        GROUP BY l.scene_id, s.name
+        ORDER BY call_count DESC
+        LIMIT 10
+    </select>
+
+    <select id="modelDistribution" resultType="map">
+        SELECT m.model_name, COUNT(l.id) AS call_count
+        FROM ai_call_log l
+        LEFT JOIN ai_model_config m ON l.model_id = m.id
+        GROUP BY l.model_id, m.model_name
+        ORDER BY call_count DESC
+    </select>
+
+    <select id="tokenTrend" resultType="map">
+        SELECT DATE(call_time) AS date, SUM(total_tokens) AS total_tokens
+        FROM ai_call_log
+        WHERE call_time >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        GROUP BY DATE(call_time)
+        ORDER BY date ASC
+    </select>
+
+    <select id="sceneStats" resultType="map">
+        SELECT s.name AS scene_name, COUNT(l.id) AS call_count,
+               SUM(l.success) AS success_count,
+               ROUND(AVG(l.latency_ms)) AS avg_latency
+        FROM ai_call_log l
+        LEFT JOIN ai_scene s ON l.scene_id = s.id
+        <where>
+            <if test="startDate != null and startDate != ''">AND l.call_time >= #{startDate}</if>
+            <if test="endDate != null and endDate != ''">AND l.call_time &lt;= #{endDate}</if>
+        </where>
+        GROUP BY l.scene_id, s.name
+        ORDER BY call_count DESC
+    </select>
+
+    <select id="userRankTop20" resultType="map">
+        SELECT u.real_name, u.username, COUNT(l.id) AS call_count
+        FROM ai_call_log l
+        LEFT JOIN sys_user u ON l.user_id = u.id
+        GROUP BY l.user_id, u.real_name, u.username
+        ORDER BY call_count DESC
+        LIMIT 20
+    </select>
+
+    <select id="countTodayByUser" resultType="long">
+        SELECT COUNT(*) FROM ai_call_log WHERE user_id = #{userId} AND DATE(call_time) = CURDATE()
+    </select>
+
+    <select id="countThisMonthByUser" resultType="long">
+        SELECT COUNT(*) FROM ai_call_log WHERE user_id = #{userId}
+        AND DATE_FORMAT(call_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+    </select>
+
+    <select id="countTokenThisMonthByUser" resultType="long">
+        SELECT COALESCE(SUM(total_tokens), 0) FROM ai_call_log WHERE user_id = #{userId}
+        AND DATE_FORMAT(call_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+    </select>
+</mapper>

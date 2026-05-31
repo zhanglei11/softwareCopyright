@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sva.system.mapper.ReportTaskSummaryMapper">
+    <resultMap id="BaseRM" type="com.sva.system.domain.ReportTaskSummary">
+        <id column="id" property="id"/>
+        <result column="task_id" property="taskId"/>
+        <result column="total_images" property="totalImages"/>
+        <result column="success_count" property="successCount"/>
+        <result column="fail_count" property="failCount"/>
+        <result column="avg_confidence" property="avgConfidence"/>
+        <result column="min_confidence" property="minConfidence"/>
+        <result column="max_confidence" property="maxConfidence"/>
+        <result column="low_confidence_count" property="lowConfidenceCount"/>
+        <result column="category_stats" property="categoryStats"/>
+        <result column="confidence_distribution" property="confidenceDistribution"/>
+        <result column="generated_at" property="generatedAt"/>
+    </resultMap>
+    <select id="selectByTaskId" resultMap="BaseRM">SELECT * FROM report_task_summary WHERE task_id=#{taskId}</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO report_task_summary(task_id,total_images,success_count,fail_count,avg_confidence,min_confidence,max_confidence,low_confidence_count,category_stats,confidence_distribution,generated_at)
+        VALUES(#{taskId},#{totalImages},#{successCount},#{failCount},#{avgConfidence},#{minConfidence},#{maxConfidence},#{lowConfidenceCount},#{categoryStats},#{confidenceDistribution},NOW())
+    </insert>
+    <update id="update">
+        UPDATE report_task_summary SET avg_confidence=#{avgConfidence},category_stats=#{categoryStats},confidence_distribution=#{confidenceDistribution} WHERE task_id=#{taskId}
+    </update>
+</mapper>

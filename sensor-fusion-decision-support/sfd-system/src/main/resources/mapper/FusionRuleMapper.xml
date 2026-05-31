@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.sfd.system.mapper.FusionRuleMapper">
+    <resultMap id="RM" type="com.sursoft.sfd.system.domain.FusionRule">
+        <id column="id" property="id"/>
+        <result column="scheme_id" property="schemeId"/>
+        <result column="rule_name" property="ruleName"/>
+        <result column="fusion_type" property="fusionType"/>
+        <result column="fusion_fields" property="fusionFields"/>
+        <result column="trigger_condition" property="triggerCondition"/>
+        <result column="sort" property="sort"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="remark" property="remark"/>
+    </resultMap>
+    <select id="selectBySchemeId" resultMap="RM">
+        SELECT * FROM fusion_rule WHERE scheme_id=#{schemeId} AND is_deleted=0 ORDER BY sort
+    </select>
+    <select id="selectById" resultMap="RM">
+        SELECT * FROM fusion_rule WHERE id=#{id} AND is_deleted=0
+    </select>
+    <insert id="insert">
+        INSERT INTO fusion_rule(id,scheme_id,rule_name,fusion_type,fusion_fields,trigger_condition,sort,status,is_deleted,created_at,created_by,remark)
+        VALUES(#{id},#{schemeId},#{ruleName},#{fusionType},#{fusionFields},#{triggerCondition},#{sort},#{status},0,NOW(),#{createdBy},#{remark})
+    </insert>
+    <update id="update">
+        UPDATE fusion_rule SET rule_name=#{ruleName},fusion_type=#{fusionType},fusion_fields=#{fusionFields},
+        trigger_condition=#{triggerCondition},sort=#{sort},status=#{status},remark=#{remark},
+        updated_at=NOW(),updated_by=#{updatedBy} WHERE id=#{id}
+    </update>
+    <update id="deleteById">UPDATE fusion_rule SET is_deleted=1,updated_at=NOW() WHERE id=#{id}</update>
+</mapper>

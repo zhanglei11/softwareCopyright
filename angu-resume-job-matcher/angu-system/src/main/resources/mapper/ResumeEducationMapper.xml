@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.matcher.system.mapper.ResumeEducationMapper">
+    <resultMap id="eduMap" type="com.angu.matcher.system.domain.ResumeEducation">
+        <id property="id" column="id"/>
+        <result property="resumeId" column="resume_id"/>
+        <result property="school" column="school"/>
+        <result property="major" column="major"/>
+        <result property="eduLevel" column="edu_level"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+    </resultMap>
+
+    <select id="selectByResumeId" resultMap="eduMap">
+        SELECT * FROM resume_education WHERE resume_id=#{resumeId} ORDER BY start_date DESC
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO resume_education(resume_id,school,major,edu_level,start_date,end_date)
+        VALUES(#{resumeId},#{school},#{major},#{eduLevel},#{startDate},#{endDate})
+    </insert>
+    <delete id="deleteByResumeId">DELETE FROM resume_education WHERE resume_id=#{resumeId}</delete>
+</mapper>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.matcher.system.mapper.JobApplicationMapper">
+
+    <resultMap id="appMap" type="com.angu.matcher.system.domain.JobApplication">
+        <id property="id" column="id"/>
+        <result property="positionId" column="position_id"/>
+        <result property="resumeId" column="resume_id"/>
+        <result property="status" column="status"/>
+        <result property="operateTime" column="operate_time"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="remark" column="remark"/>
+        <result property="createdTime" column="created_time"/>
+        <result property="positionTitle" column="position_title"/>
+        <result property="resumeName" column="resume_name"/>
+    </resultMap>
+
+    <resultMap id="logMap" type="com.angu.matcher.system.domain.ApplicationLog">
+        <id property="id" column="id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="fromStatus" column="from_status"/>
+        <result property="toStatus" column="to_status"/>
+        <result property="operatorId" column="operator_id"/>
+        <result property="operatorName" column="operator_name"/>
+        <result property="remark" column="remark"/>
+        <result property="createdTime" column="created_time"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="appMap">
+        SELECT a.*, p.title as position_title, r.name as resume_name
+        FROM job_application a
+        LEFT JOIN job_position p ON a.position_id = p.id
+        LEFT JOIN resume_main r ON a.resume_id = r.id
+        WHERE 1=1
+        <if test="positionId != null">AND a.position_id = #{positionId}</if>
+        <if test="status != null and status != ''">AND a.status = #{status}</if>
+        ORDER BY a.created_time DESC
+    </select>
+
+    <select id="selectById" resultMap="appMap">
+        SELECT a.*, p.title as position_title, r.name as resume_name
+        FROM job_application a
+        LEFT JOIN job_position p ON a.position_id = p.id
+        LEFT JOIN resume_main r ON a.resume_id = r.id
+        WHERE a.id=#{id}
+    </select>
+
+    <select id="selectByPositionAndResume" resultMap="appMap">
+        SELECT * FROM job_application WHERE position_id=#{positionId} AND resume_id=#{resumeId}
+        LIMIT 1
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO job_application(position_id,resume_id,status,operate_time,operator_id,remark,created_time)
+        VALUES(#{positionId},#{resumeId},#{status},NOW(),#{operatorId},#{remark},NOW())
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE job_application SET status=#{status},operate_time=NOW(),operator_id=#{operatorId},remark=#{remark}
+        WHERE id=#{id}
+    </update>
+
+    <insert id="insertLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO application_log(application_id,from_status,to_status,operator_id,operator_name,remark,created_time)
+        VALUES(#{applicationId},#{fromStatus},#{toStatus},#{operatorId},#{operatorName},#{remark},NOW())
+    </insert>
+
+    <select id="selectLogsByApplicationId" resultMap="logMap">
+        SELECT * FROM application_log WHERE application_id=#{applicationId} ORDER BY created_time DESC
+    </select>
+
+</mapper>

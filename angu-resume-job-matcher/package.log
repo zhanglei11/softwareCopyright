@@ -1,0 +1,131 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] angu-resume-job-matcher                                            [pom]
+[INFO] angu-common                                                        [jar]
+[INFO] angu-system                                                        [jar]
+[INFO] angu-framework                                                     [jar]
+[INFO] angu-admin                                                         [jar]
+[INFO] 
+[INFO] ------------------< com.angu:angu-resume-job-matcher >------------------
+[INFO] Building angu-resume-job-matcher 1.0.0                             [1/5]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] ------------------------< com.angu:angu-common >------------------------
+[INFO] Building angu-common 1.0.0                                         [2/5]
+[INFO]   from angu-common/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ angu-common ---
+[INFO] skip non existing resourceDirectory /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-common/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ angu-common ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ angu-common ---
+[INFO] skip non existing resourceDirectory /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-common/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ angu-common ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ angu-common ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.5.0:jar (default-jar) @ angu-common ---
+[INFO] Building jar: /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-common/target/angu-common-1.0.0.jar
+[INFO] 
+[INFO] ------------------------< com.angu:angu-system >------------------------
+[INFO] Building angu-system 1.0.0                                         [3/5]
+[INFO]   from angu-system/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ angu-system ---
+[INFO] Copying 12 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ angu-system ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 57 source files with javac [debug parameters release 21] to target/classes
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by lombok.permit.Permit
+WARNING: Please consider reporting this to the maintainers of class lombok.permit.Permit
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ angu-system ---
+[INFO] skip non existing resourceDirectory /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-system/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ angu-system ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ angu-system ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.5.0:jar (default-jar) @ angu-system ---
+[INFO] Building jar: /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-system/target/angu-system-1.0.0.jar
+[INFO] 
+[INFO] ----------------------< com.angu:angu-framework >-----------------------
+[INFO] Building angu-framework 1.0.0                                      [4/5]
+[INFO]   from angu-framework/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ angu-framework ---
+[INFO] skip non existing resourceDirectory /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-framework/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ angu-framework ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 10 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ angu-framework ---
+[INFO] skip non existing resourceDirectory /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-framework/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ angu-framework ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ angu-framework ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.5.0:jar (default-jar) @ angu-framework ---
+[INFO] Building jar: /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-framework/target/angu-framework-1.0.0.jar
+[INFO] 
+[INFO] ------------------------< com.angu:angu-admin >-------------------------
+[INFO] Building angu-admin 1.0.0                                          [5/5]
+[INFO]   from angu-admin/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ angu-admin ---
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ angu-admin ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 11 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ angu-admin ---
+[INFO] skip non existing resourceDirectory /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-admin/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ angu-admin ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ angu-admin ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.5.0:jar (default-jar) @ angu-admin ---
+[INFO] Building jar: /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-admin/target/angu-admin-1.0.0.jar
+[INFO] 
+[INFO] --- spring-boot:3.5.0:repackage (default) @ angu-admin ---
+[INFO] Replacing main artifact /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-admin/target/angu-admin-1.0.0.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /Users/zhanglei/cz/project/softwareCopyright/angu-resume-job-matcher/angu-admin/target/angu-admin-1.0.0.jar.original
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for angu-resume-job-matcher 1.0.0:
+[INFO] 
+[INFO] angu-resume-job-matcher ............................ SUCCESS [  0.005 s]
+[INFO] angu-common ........................................ SUCCESS [  3.314 s]
+[INFO] angu-system ........................................ SUCCESS [  8.150 s]
+[INFO] angu-framework ..................................... SUCCESS [  1.861 s]
+[INFO] angu-admin ......................................... SUCCESS [  3.089 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  17.363 s
+[INFO] Finished at: 2026-05-27T14:41:08+08:00
+[INFO] ------------------------------------------------------------------------

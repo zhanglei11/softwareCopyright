@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.vision.system.mapper.SysUserMapper">
+
+    <resultMap id="userMap" type="com.sursoft.vision.system.domain.SysUser">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="realName" column="real_name"/>
+        <result property="phone" column="phone"/>
+        <result property="department" column="department"/>
+        <result property="password" column="password"/>
+        <result property="status" column="status"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="userMap">
+        SELECT * FROM sys_user WHERE id=#{id} AND is_deleted=0
+    </select>
+
+    <select id="selectByUsername" resultMap="userMap">
+        SELECT * FROM sys_user WHERE username=#{username} AND is_deleted=0
+    </select>
+
+    <select id="selectList" resultMap="userMap">
+        SELECT * FROM sys_user WHERE is_deleted=0
+        <if test="username != null and username != ''">AND username LIKE CONCAT('%',#{username},'%')</if>
+        <if test="realName != null and realName != ''">AND real_name LIKE CONCAT('%',#{realName},'%')</if>
+        <if test="status != null">AND status=#{status}</if>
+        ORDER BY created_at DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user(username,real_name,phone,department,password,status,is_deleted,created_at)
+        VALUES(#{username},#{realName},#{phone},#{department},#{password},#{status},0,NOW())
+    </insert>
+
+    <update id="updateById">
+        UPDATE sys_user
+        <set>
+            <if test="realName != null">real_name=#{realName},</if>
+            <if test="phone != null">phone=#{phone},</if>
+            <if test="department != null">department=#{department},</if>
+            <if test="password != null">password=#{password},</if>
+            <if test="status != null">status=#{status},</if>
+            <if test="isDeleted != null">is_deleted=#{isDeleted},</if>
+            updated_at=NOW()
+        </set>
+        WHERE id=#{id}
+    </update>
+
+    <delete id="deleteById">UPDATE sys_user SET is_deleted=1 WHERE id=#{id}</delete>
+
+    <select id="selectRoleKeysByUserId" resultType="string">
+        SELECT r.role_key FROM sys_role r
+        INNER JOIN sys_user_role ur ON r.id=ur.role_id
+        WHERE ur.user_id=#{userId} AND r.is_deleted=0 AND r.status=1
+    </select>
+
+    <select id="selectPermsByUserId" resultType="string">
+        SELECT DISTINCT m.perm FROM sys_menu m
+        INNER JOIN sys_role_menu rm ON m.id=rm.menu_id
+        INNER JOIN sys_user_role ur ON rm.role_id=ur.role_id
+        WHERE ur.user_id=#{userId} AND m.perm IS NOT NULL AND m.perm!=''
+    </select>
+
+    <insert id="insertUserRoles">
+        INSERT INTO sys_user_role(user_id,role_id) VALUES
+        <foreach collection="roleIds" item="roleId" separator=",">
+            (#{userId},#{roleId})
+        </foreach>
+    </insert>
+
+    <delete id="deleteUserRoles">DELETE FROM sys_user_role WHERE user_id=#{userId}</delete>
+</mapper>

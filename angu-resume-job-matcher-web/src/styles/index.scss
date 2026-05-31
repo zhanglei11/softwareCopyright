@@ -1,0 +1,138 @@
+@use './nprogress.scss';
+
+:root {
+  --app-bg: #f6f2ea;
+  --panel-bg: rgba(255, 255, 255, 0.84);
+  --panel-border: rgba(15, 118, 110, 0.12);
+  --ink-strong: #102a28;
+  --ink-soft: #5b6d6b;
+  --teal: #0f766e;
+  --shadow-soft: 0 16px 40px rgba(16, 42, 40, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  font-family: 'Avenir Next', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: var(--ink-strong);
+  background:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.14), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(245, 158, 11, 0.16), transparent 24%),
+    linear-gradient(180deg, #f9f6ef 0%, #f4eee3 100%);
+}
+
+body {
+  min-width: 1280px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page-hero {
+  padding: 18px 20px;
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.14), rgba(255, 255, 255, 0.9));
+  box-shadow: var(--shadow-soft);
+}
+
+.page-hero h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+.page-hero p,
+.muted-text {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.glass-card {
+  border: 1px solid var(--panel-border);
+  border-radius: 22px;
+  background: var(--panel-bg);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+}
+
+.toolbar-row,
+.toolbar-actions,
+.toolbar-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.toolbar-row {
+  justify-content: space-between;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(15, 118, 110, 0.1);
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.metric-label {
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+
+.metric-value {
+  margin-top: 10px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.chart-panel {
+  height: 360px;
+}
+
+.split-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 1440px) {
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .split-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 960px) {
+  body {
+    min-width: 100%;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+}

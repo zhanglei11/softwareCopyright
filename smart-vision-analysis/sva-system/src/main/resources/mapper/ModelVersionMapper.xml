@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sva.system.mapper.ModelVersionMapper">
+    <resultMap id="BaseRM" type="com.sva.system.domain.ModelVersion">
+        <id column="id" property="id"/>
+        <result column="model_name" property="modelName"/>
+        <result column="version_no" property="versionNo"/>
+        <result column="scene_desc" property="sceneDesc"/>
+        <result column="support_labels" property="supportLabels"/>
+        <result column="release_date" property="releaseDate"/>
+        <result column="status" property="status"/>
+        <result column="remark" property="remark"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+    <select id="selectList" resultMap="BaseRM">
+        SELECT * FROM model_version WHERE deleted=0
+        <if test="modelName != null and modelName != ''">AND model_name LIKE CONCAT('%',#{modelName},'%')</if>
+        <if test="status != null">AND status=#{status}</if>
+        ORDER BY created_at DESC
+    </select>
+    <select id="selectById" resultMap="BaseRM">SELECT * FROM model_version WHERE id=#{id} AND deleted=0</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO model_version(model_name,version_no,scene_desc,support_labels,release_date,status,remark,created_by,created_at,updated_at,deleted)
+        VALUES(#{modelName},#{versionNo},#{sceneDesc},#{supportLabels},#{releaseDate},#{status},#{remark},#{createdBy},NOW(),NOW(),0)
+    </insert>
+    <update id="update">UPDATE model_version SET model_name=#{modelName},version_no=#{versionNo},scene_desc=#{sceneDesc},support_labels=#{supportLabels},release_date=#{releaseDate},remark=#{remark},updated_at=NOW() WHERE id=#{id}</update>
+    <update id="deleteById">UPDATE model_version SET deleted=1,updated_at=NOW() WHERE id=#{id}</update>
+    <update id="updateStatus">UPDATE model_version SET status=#{status},updated_at=NOW() WHERE id=#{id}</update>
+    <select id="countTasksByModelId" resultType="long">SELECT COUNT(*) FROM recognition_task WHERE model_version_id=#{modelId}</select>
+    <select id="selectTasksByModelId" resultType="com.sva.system.domain.RecognitionTask">SELECT * FROM recognition_task WHERE model_version_id=#{modelId} ORDER BY created_at DESC</select>
+</mapper>

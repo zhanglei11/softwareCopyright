@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.vision.system.mapper.DefectCategoryMapper">
+    <resultMap id="RM" type="com.sursoft.vision.system.domain.DefectCategory">
+        <id property="id" column="id"/>
+        <result property="code" column="code"/>
+        <result property="name" column="name"/>
+        <result property="level" column="level"/>
+        <result property="description" column="description"/>
+        <result property="status" column="status"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="updatedBy" column="updated_by"/>
+    </resultMap>
+    <select id="selectById" resultMap="RM">SELECT * FROM defect_category WHERE id=#{id} AND is_deleted=0</select>
+    <select id="selectByCode" resultMap="RM">SELECT * FROM defect_category WHERE code=#{code} AND is_deleted=0</select>
+    <select id="selectList" resultMap="RM">
+        SELECT * FROM defect_category WHERE is_deleted=0
+        <if test="name != null and name != ''">AND name LIKE CONCAT('%',#{name},'%')</if>
+        <if test="level != null">AND level=#{level}</if>
+        <if test="status != null">AND status=#{status}</if>
+        ORDER BY created_at DESC
+    </select>
+    <select id="countByCategory" resultType="long">
+        SELECT COUNT(*) FROM defect_record WHERE category_id=#{categoryId} AND is_deleted=0
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO defect_category(code,name,level,description,status,is_deleted,created_at)
+        VALUES(#{code},#{name},#{level},#{description},#{status},0,NOW())
+    </insert>
+    <update id="updateById">
+        UPDATE defect_category <set>
+            <if test="name != null">name=#{name},</if>
+            <if test="level != null">level=#{level},</if>
+            <if test="description != null">description=#{description},</if>
+            <if test="status != null">status=#{status},</if>
+            updated_at=NOW()
+        </set> WHERE id=#{id}
+    </update>
+    <delete id="deleteById">DELETE FROM defect_category WHERE id=#{id}</delete>
+</mapper>

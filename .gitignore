@@ -1,0 +1,57 @@
+# ===== Java / Maven =====
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+!**/src/**/*.jar
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# ===== Frontend build outputs =====
+dist/
+dist-prod/
+dist-dev/
+build/
+
+# ===== Node / pnpm =====
+node_modules/
+.pnp
+.pnp.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# ===== Logs =====
+logs/
+*.log
+
+# ===== IDE / Editor =====
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===== Environment / Secrets =====
+.env.local
+.env.*.local
+
+# ===== OS =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V7
+.Trashes
+ehthumbs.db
+
+# ===== Upload / Runtime files =====
+uploads/

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.ai.system.mapper.AiModelConfigMapper">
+    <select id="selectAll" resultType="com.angu.ai.system.domain.entity.AiModelConfig">
+        SELECT id, model_name, model_id, provider, api_url, max_context_tokens, status, remark, created_time
+        FROM ai_model_config ORDER BY id
+    </select>
+    <select id="selectById" resultType="com.angu.ai.system.domain.entity.AiModelConfig">
+        SELECT * FROM ai_model_config WHERE id = #{id}
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ai_model_config (model_name, model_id, provider, api_url, api_key_encrypted,
+                                     max_context_tokens, status, remark, created_time)
+        VALUES (#{modelName}, #{modelId}, #{provider}, #{apiUrl}, #{apiKeyEncrypted},
+                #{maxContextTokens}, 1, #{remark}, NOW())
+    </insert>
+    <update id="updateById">
+        UPDATE ai_model_config
+        <set>
+            <if test="modelName != null">model_name = #{modelName},</if>
+            <if test="apiUrl != null">api_url = #{apiUrl},</if>
+            <if test="apiKeyEncrypted != null">api_key_encrypted = #{apiKeyEncrypted},</if>
+            <if test="maxContextTokens != null">max_context_tokens = #{maxContextTokens},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+    <update id="updateStatus">
+        UPDATE ai_model_config SET status = #{status} WHERE id = #{id}
+    </update>
+</mapper>

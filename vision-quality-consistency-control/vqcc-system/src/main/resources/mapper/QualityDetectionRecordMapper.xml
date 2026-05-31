@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vqcc.system.mapper.QualityDetectionRecordMapper">
+    <resultMap id="BaseResultMap" type="com.vqcc.system.domain.QualityDetectionRecord">
+        <id column="id" property="id"/>
+        <result column="task_id" property="taskId"/>
+        <result column="image_id" property="imageId"/>
+        <result column="measured_values" property="measuredValues"/>
+        <result column="is_qualified" property="isQualified"/>
+        <result column="exceeded_metrics" property="exceededMetrics"/>
+        <result column="detected_at" property="detectedAt"/>
+    </resultMap>
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        SELECT * FROM quality_detection_record WHERE task_id = #{taskId}
+        <if test="isQualified != null">AND is_qualified = #{isQualified}</if>
+        ORDER BY detected_at DESC
+    </select>
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM quality_detection_record WHERE id = #{id}
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quality_detection_record (task_id, image_id, measured_values, is_qualified, exceeded_metrics, detected_at)
+        VALUES (#{taskId}, #{imageId}, #{measuredValues}, #{isQualified}, #{exceededMetrics}, NOW())
+    </insert>
+    <select id="countByTaskId" resultType="long">
+        SELECT COUNT(*) FROM quality_detection_record WHERE task_id = #{taskId}
+    </select>
+    <select id="countQualifiedByTaskId" resultType="long">
+        SELECT COUNT(*) FROM quality_detection_record WHERE task_id = #{taskId} AND is_qualified = 1
+    </select>
+</mapper>

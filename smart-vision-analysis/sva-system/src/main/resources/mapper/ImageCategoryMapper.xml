@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sva.system.mapper.ImageCategoryMapper">
+    <resultMap id="BaseRM" type="com.sva.system.domain.ImageCategory">
+        <id column="id" property="id"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="deleted" property="deleted"/>
+        <result column="image_count" property="imageCount"/>
+    </resultMap>
+    <select id="selectAll" resultMap="BaseRM">SELECT ic.*,
+        (SELECT COUNT(*) FROM image_file img WHERE img.category_id=ic.id AND img.deleted=0) AS image_count
+        FROM image_category ic WHERE ic.deleted=0 ORDER BY ic.sort_order,ic.id</select>
+    <select id="selectById" resultMap="BaseRM">SELECT * FROM image_category WHERE id=#{id} AND deleted=0</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO image_category(category_name,parent_id,sort_order,created_by,created_at,deleted)
+        VALUES(#{categoryName},#{parentId},#{sortOrder},#{createdBy},NOW(),0)
+    </insert>
+    <update id="update">UPDATE image_category SET category_name=#{categoryName},sort_order=#{sortOrder} WHERE id=#{id}</update>
+    <update id="deleteById">UPDATE image_category SET deleted=1 WHERE id=#{id}</update>
+    <select id="countImagesByCategoryId" resultType="long">SELECT COUNT(*) FROM image_file WHERE category_id=#{categoryId} AND deleted=0</select>
+</mapper>

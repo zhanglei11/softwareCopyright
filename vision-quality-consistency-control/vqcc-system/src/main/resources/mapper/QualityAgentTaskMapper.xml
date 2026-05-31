@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vqcc.system.mapper.QualityAgentTaskMapper">
+
+    <resultMap id="BaseResultMap" type="com.vqcc.system.domain.QualityAgentTask">
+        <id column="id" property="id"/>
+        <result column="agent_id"        property="agentId"/>
+        <result column="task_id"         property="taskId"/>
+        <result column="dispatch_status" property="dispatchStatus"/>
+        <result column="dispatch_at"     property="dispatchAt"/>
+        <result column="complete_at"     property="completeAt"/>
+        <result column="result_summary"  property="resultSummary"/>
+        <result column="created_by"      property="createdBy"/>
+        <result column="created_at"      property="createdAt"/>
+        <result column="agent_name"      property="agentName"/>
+        <result column="agent_code"      property="agentCode"/>
+        <result column="task_name"       property="taskName"/>
+        <result column="task_code"       property="taskCode"/>
+    </resultMap>
+
+    <select id="selectByAgentId" resultMap="BaseResultMap">
+        SELECT at.*, a.agent_name, a.agent_code, t.task_name, t.task_code
+        FROM quality_agent_task at
+        LEFT JOIN quality_agent a ON a.id = at.agent_id
+        LEFT JOIN quality_task  t ON t.id = at.task_id
+        WHERE at.agent_id = #{agentId}
+        ORDER BY at.id DESC
+    </select>
+
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        SELECT at.*, a.agent_name, a.agent_code, t.task_name, t.task_code
+        FROM quality_agent_task at
+        LEFT JOIN quality_agent a ON a.id = at.agent_id
+        LEFT JOIN quality_task  t ON t.id = at.task_id
+        WHERE at.task_id = #{taskId}
+        ORDER BY at.id DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quality_agent_task
+        (agent_id, task_id, dispatch_status, dispatch_at, created_by, created_at)
+        VALUES
+        (#{agentId}, #{taskId}, 0, NOW(), #{createdBy}, NOW())
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE quality_agent_task
+        <set>
+            dispatch_status = #{dispatchStatus},
+            <if test="dispatchStatus == 2 or dispatchStatus == 3">complete_at = NOW(),</if>
+            <if test="resultSummary != null">result_summary = #{resultSummary},</if>
+            complete_at = complete_at
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,50 @@
+server:
+  port: 19014
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: sensor-fusion-decision-support
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      url: jdbc:mysql://127.0.0.1:3306/sensor_fusion_decision_support_dev?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false
+      username: root
+      password:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      initial-size: 5
+      min-idle: 5
+      max-active: 20
+      test-while-idle: true
+      validation-query: SELECT 1
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+
+mybatis:
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+sfd:
+  jwt:
+    secret: SurSoftSFD@2026SecretKeyFor256BitHMACSHA
+    expire-seconds: 7200
+
+logging:
+  level:
+    com.sursoft.sfd: debug
+  file:
+    name: logs/sfd-app.log

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.imaging.scheduler.system.mapper.system.SysUserMapper">
+
+    <select id="selectByUsername" resultType="com.imaging.scheduler.system.domain.system.SysUser">
+        SELECT * FROM sys_user WHERE username = #{username} AND deleted = 0
+    </select>
+
+    <select id="selectById" resultType="com.imaging.scheduler.system.domain.system.SysUser">
+        SELECT * FROM sys_user WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectList" resultType="com.imaging.scheduler.system.domain.system.SysUser">
+        SELECT * FROM sys_user WHERE deleted = 0
+        <if test="username != null and username != ''">
+            AND username LIKE CONCAT('%', #{username}, '%')
+        </if>
+        <if test="realName != null and realName != ''">
+            AND real_name LIKE CONCAT('%', #{realName}, '%')
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+        ORDER BY created_at DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user(username, password, real_name, phone, email, dept, status, created_by, updated_by, created_at, updated_at)
+        VALUES(#{username}, #{password}, #{realName}, #{phone}, #{email}, #{dept}, #{status}, #{createdBy}, #{updatedBy}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE sys_user
+        <set>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="realName != null">real_name = #{realName},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="dept != null">dept = #{dept},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updatedBy != null">updated_by = #{updatedBy},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteById">
+        UPDATE sys_user SET deleted = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="checkUsernameUnique" resultType="int">
+        SELECT COUNT(1) FROM sys_user WHERE username = #{username} AND deleted = 0
+        <if test="excludeId != null">AND id != #{excludeId}</if>
+    </select>
+
+    <select id="countByUsername" resultType="int">
+        SELECT COUNT(1) FROM sys_user WHERE username = #{username} AND deleted = 0
+        <if test="excludeId != null">AND id != #{excludeId}</if>
+    </select>
+
+    <select id="selectRoleCodesByUserId" resultType="string">
+        SELECT r.role_code FROM sys_role r
+        JOIN sys_user_role ur ON r.id = ur.role_id
+        WHERE ur.user_id = #{userId} AND r.deleted = 0
+    </select>
+</mapper>

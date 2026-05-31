@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.sfd.system.mapper.FusionSchemeMapper">
+    <resultMap id="RM" type="com.sursoft.sfd.system.domain.FusionScheme">
+        <id column="id" property="id"/>
+        <result column="scheme_code" property="schemeCode"/>
+        <result column="scheme_name" property="schemeName"/>
+        <result column="scene_types" property="sceneTypes"/>
+        <result column="fusion_goal" property="fusionGoal"/>
+        <result column="status" property="status"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="remark" property="remark"/>
+        <result column="rule_count" property="ruleCount"/>
+        <result column="created_by_name" property="createdByName"/>
+    </resultMap>
+    <select id="selectList" resultMap="RM">
+        SELECT fs.*, (SELECT COUNT(*) FROM fusion_rule fr WHERE fr.scheme_id=fs.id AND fr.is_deleted=0) AS rule_count,
+               u.real_name AS created_by_name
+        FROM fusion_scheme fs LEFT JOIN sys_user u ON fs.created_by=u.id
+        WHERE fs.is_deleted=0
+        <if test="keyword != null and keyword != ''">AND fs.scheme_name LIKE CONCAT('%',#{keyword},'%')</if>
+        <if test="status != null">AND fs.status=#{status}</if>
+        ORDER BY fs.created_at DESC
+    </select>
+    <select id="selectById" resultMap="RM">
+        SELECT * FROM fusion_scheme WHERE id=#{id} AND is_deleted=0
+    </select>
+    <select id="selectAllEnabled" resultMap="RM">
+        SELECT * FROM fusion_scheme WHERE status=1 AND is_deleted=0
+    </select>
+    <insert id="insert">
+        INSERT INTO fusion_scheme(id,scheme_code,scheme_name,scene_types,fusion_goal,status,is_deleted,created_at,created_by,remark)
+        VALUES(#{id},#{schemeCode},#{schemeName},#{sceneTypes},#{fusionGoal},#{status},0,NOW(),#{createdBy},#{remark})
+    </insert>
+    <update id="update">
+        UPDATE fusion_scheme SET scheme_name=#{schemeName},scene_types=#{sceneTypes},fusion_goal=#{fusionGoal},
+        remark=#{remark},updated_at=NOW(),updated_by=#{updatedBy} WHERE id=#{id}
+    </update>
+    <update id="deleteById">UPDATE fusion_scheme SET is_deleted=1,updated_at=NOW() WHERE id=#{id}</update>
+    <update id="updateStatus">UPDATE fusion_scheme SET status=#{status},updated_at=NOW(),updated_by=#{updatedBy} WHERE id=#{id}</update>
+</mapper>

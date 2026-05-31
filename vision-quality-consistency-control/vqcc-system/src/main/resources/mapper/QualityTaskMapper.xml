@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.vqcc.system.mapper.QualityTaskMapper">
+
+    <resultMap id="BaseResultMap" type="com.vqcc.system.domain.QualityTask">
+        <id column="id" property="id"/>
+        <result column="task_code" property="taskCode"/>
+        <result column="task_name" property="taskName"/>
+        <result column="detection_target" property="detectionTarget"/>
+        <result column="template_id" property="templateId"/>
+        <result column="image_count" property="imageCount"/>
+        <result column="plan_execute_time" property="planExecuteTime"/>
+        <result column="priority" property="priority"/>
+        <result column="remark" property="remark"/>
+        <result column="status" property="status"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="qualified_count" property="qualifiedCount"/>
+        <result column="unqualified_count" property="unqualifiedCount"/>
+        <result column="qualified_rate" property="qualifiedRate"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
+        <result column="template_name" property="templateName"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT t.*, qt.template_name
+        FROM quality_task t
+        LEFT JOIN quality_template qt ON qt.id = t.template_id
+        WHERE t.is_deleted = 0
+        <if test="taskName != null and taskName != ''">
+            AND t.task_name LIKE CONCAT('%', #{taskName}, '%')
+        </if>
+        <if test="detectionTarget != null and detectionTarget != ''">
+            AND t.detection_target LIKE CONCAT('%', #{detectionTarget}, '%')
+        </if>
+        <if test="status != null">AND t.status = #{status}</if>
+        <if test="templateId != null">AND t.template_id = #{templateId}</if>
+        ORDER BY t.id DESC
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT t.*, qt.template_name
+        FROM quality_task t
+        LEFT JOIN quality_template qt ON qt.id = t.template_id
+        WHERE t.id = #{id} AND t.is_deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quality_task (task_code, task_name, detection_target, template_id, image_count,
+            plan_execute_time, priority, remark, status, created_at, created_by, updated_at, updated_by)
+        VALUES (#{taskCode}, #{taskName}, #{detectionTarget}, #{templateId}, #{imageCount},
+                #{planExecuteTime}, #{priority}, #{remark}, #{status},
+                NOW(), #{createdBy}, NOW(), #{createdBy})
+    </insert>
+
+    <update id="update">
+        UPDATE quality_task
+        <set>
+            updated_at = NOW(),
+            <if test="status != null">status = #{status},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="qualifiedCount != null">qualified_count = #{qualifiedCount},</if>
+            <if test="unqualifiedCount != null">unqualified_count = #{unqualifiedCount},</if>
+            <if test="qualifiedRate != null">qualified_rate = #{qualifiedRate},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            updated_by = #{updatedBy}
+        </set>
+        WHERE id = #{id} AND is_deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE quality_task SET is_deleted = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="selectMaxCodeByDate" resultType="string">
+        SELECT task_code FROM quality_task WHERE task_code LIKE CONCAT('TASK-', #{dateStr}, '%')
+        ORDER BY id DESC LIMIT 1
+    </select>
+
+    <update id="updateStatistics">
+        UPDATE quality_task SET
+            qualified_count = #{qualifiedCount},
+            unqualified_count = #{unqualifiedCount},
+            qualified_rate = ROUND(#{qualifiedCount} * 100.0 / (#{qualifiedCount} + #{unqualifiedCount}), 2),
+            updated_at = NOW()
+        WHERE id = #{taskId}
+    </update>
+</mapper>

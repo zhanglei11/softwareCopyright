@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sursoft.iidp.system.ingest.mapper.IngestTaskMapper">
+    <resultMap id="TaskMap" type="com.sursoft.iidp.system.ingest.domain.IngestTask">
+        <id property="id" column="id"/>
+        <result property="taskCode" column="task_code"/>
+        <result property="taskName" column="task_name"/>
+        <result property="datasourceId" column="datasource_id"/>
+        <result property="ingestType" column="ingest_type"/>
+        <result property="cronExpression" column="cron_expression"/>
+        <result property="filterFileTypes" column="filter_file_types"/>
+        <result property="filterFilePattern" column="filter_file_pattern"/>
+        <result property="filterStartTime" column="filter_start_time"/>
+        <result property="filterEndTime" column="filter_end_time"/>
+        <result property="storageDir" column="storage_dir"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="createdBy" column="created_by"/>
+        <result property="updatedBy" column="updated_by"/>
+        <result property="datasourceName" column="datasource_name"/>
+    </resultMap>
+    <select id="selectList" resultMap="TaskMap">
+        SELECT t.*, d.datasource_name FROM ingest_task t
+        LEFT JOIN datasource_config d ON d.id = t.datasource_id AND d.is_deleted = 0
+        <where>
+            t.is_deleted = 0
+            <if test="taskName != null and taskName != ''">AND t.task_name LIKE CONCAT('%', #{taskName}, '%')</if>
+            <if test="ingestType != null and ingestType != ''">AND t.ingest_type = #{ingestType}</if>
+            <if test="status != null">AND t.status = #{status}</if>
+        </where>
+        ORDER BY t.created_at DESC
+    </select>
+    <select id="selectById" resultMap="TaskMap">
+        SELECT t.*, d.datasource_name FROM ingest_task t
+        LEFT JOIN datasource_config d ON d.id = t.datasource_id AND d.is_deleted = 0
+        WHERE t.id = #{id} AND t.is_deleted = 0
+    </select>
+    <select id="checkNameUnique" resultType="int">
+        SELECT COUNT(1) FROM ingest_task WHERE task_name = #{name} AND is_deleted = 0
+        <if test="excludeId != null">AND id != #{excludeId}</if>
+    </select>
+    <select id="selectMaxCode" resultType="string">SELECT task_code FROM ingest_task ORDER BY id DESC LIMIT 1</select>
+    <select id="countTotal" resultType="long">SELECT COUNT(1) FROM ingest_task WHERE is_deleted = 0</select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO ingest_task(task_code,task_name,datasource_id,ingest_type,cron_expression,
+        filter_file_types,filter_file_pattern,filter_start_time,filter_end_time,storage_dir,status,created_by,updated_by)
+        VALUES(#{taskCode},#{taskName},#{datasourceId},#{ingestType},#{cronExpression},
+        #{filterFileTypes},#{filterFilePattern},#{filterStartTime},#{filterEndTime},#{storageDir},#{status},#{createdBy},#{updatedBy})
+    </insert>
+    <update id="update">
+        UPDATE ingest_task
+        <set>
+            <if test="taskName != null">task_name = #{taskName},</if>
+            <if test="datasourceId != null">datasource_id = #{datasourceId},</if>
+            <if test="ingestType != null">ingest_type = #{ingestType},</if>
+            <if test="cronExpression != null">cron_expression = #{cronExpression},</if>
+            <if test="filterFileTypes != null">filter_file_types = #{filterFileTypes},</if>
+            <if test="storageDir != null">storage_dir = #{storageDir},</if>
+            <if test="updatedBy != null">updated_by = #{updatedBy},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+    <delete id="deleteById">UPDATE ingest_task SET is_deleted = 1, updated_at = NOW() WHERE id = #{id}</delete>
+    <update id="updateStatus">UPDATE ingest_task SET status = #{status}, updated_at = NOW() WHERE id = #{id}</update>
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.angu.matcher.system.mapper.InterviewRecordMapper">
+    <resultMap id="irMap" type="com.angu.matcher.system.domain.InterviewRecord">
+        <id property="id" column="id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="interviewTime" column="interview_time"/>
+        <result property="interviewer" column="interviewer"/>
+        <result property="location" column="location"/>
+        <result property="score" column="score"/>
+        <result property="comment" column="comment"/>
+        <result property="result" column="result"/>
+        <result property="createdTime" column="created_time"/>
+    </resultMap>
+    <select id="selectList" resultMap="irMap">
+        SELECT * FROM interview_record WHERE 1=1
+        <if test="interviewer != null and interviewer != ''">AND interviewer LIKE CONCAT('%',#{interviewer},'%')</if>
+        ORDER BY interview_time DESC
+    </select>
+    <select id="selectById" resultMap="irMap">
+        SELECT * FROM interview_record WHERE id=#{id}
+    </select>
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO interview_record(application_id,interview_time,interviewer,location,created_time)
+        VALUES(#{applicationId},#{interviewTime},#{interviewer},#{location},NOW())
+    </insert>
+    <update id="update">
+        UPDATE interview_record SET interview_time=#{interviewTime},interviewer=#{interviewer},
+        location=#{location}
+        <if test="score != null">,score=#{score}</if>
+        <if test="comment != null">,comment=#{comment}</if>
+        <if test="result != null">,result=#{result}</if>
+        WHERE id=#{id}
+    </update>
+</mapper>
