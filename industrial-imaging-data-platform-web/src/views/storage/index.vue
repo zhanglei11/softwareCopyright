@@ -4,8 +4,8 @@
     <a-card title="存储概览" :bordered="false" style="margin-bottom:16px;border-radius:8px">
       <a-row :gutter="16" v-if="overview">
         <a-col :span="6"><a-statistic title="总文件数" :value="overview.totalFiles" /></a-col>
-        <a-col :span="6"><a-statistic title="已使用(GB)" :value="(overview.usedSize / 1073741824).toFixed(2)" /></a-col>
-        <a-col :span="6"><a-statistic title="总容量(GB)" :value="(overview.totalSize / 1073741824).toFixed(2)" /></a-col>
+        <a-col :span="6"><a-statistic title="已使用(GB)" :value="((overview.usedSize || 0) / 1073741824).toFixed(2)" /></a-col>
+        <a-col :span="6"><a-statistic title="总容量(GB)" :value="((overview.totalSize || 0) / 1073741824).toFixed(2)" /></a-col>
         <a-col :span="6"><a-statistic title="使用率" :value="overview.usagePercent" suffix="%" /></a-col>
       </a-row>
     </a-card>
@@ -94,7 +94,7 @@ const ruleColumns = [
 ]
 const loadRules = async () => {
   ruleLoading.value = true
-  try { const res = await getCleanRules(); rules.value = res.data }
+  try { const res = await getCleanRules(); rules.value = res.data.rows ?? res.data }
   finally { ruleLoading.value = false }
 }
 const showAddRule = () => { Object.assign(ruleForm, { id: undefined, name: '', storagePath: '', retentionDays: 30, maxStorageGb: undefined, cronExpression: '', enabled: true, description: '' }); ruleModalVisible.value = true }

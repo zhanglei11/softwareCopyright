@@ -25,11 +25,16 @@ export interface LoginResponse {
 // 数据源
 export interface DatasourceConfig {
   id?: number
+  name?: string
+  type?: string
   datasourceCode?: string
   datasourceName?: string
   datasourceType?: string
   host?: string
   port?: number
+  basePath?: string
+  username?: string
+  password?: string
   authType?: string
   authUsername?: string
   authPassword?: string
@@ -38,6 +43,8 @@ export interface DatasourceConfig {
   extConfig?: string
   ownerId?: number
   status?: number
+  enabled?: boolean
+  description?: string
   remark?: string
   createTime?: string
 }
@@ -45,6 +52,7 @@ export interface DatasourceConfig {
 // 接入任务
 export interface IngestTask {
   id?: number
+  name?: string
   taskCode?: string
   taskName?: string
   datasourceId?: number
@@ -52,8 +60,13 @@ export interface IngestTask {
   ingestType?: string
   cronExpression?: string
   filterFileTypes?: string
+  fileTypeFilter?: string
+  maxFileSizeMb?: number
   storageDir?: string
   status?: number
+  enabled?: boolean
+  description?: string
+  remark?: string
   createTime?: string
 }
 
@@ -73,6 +86,7 @@ export interface IngestRecord {
 // 处理任务
 export interface ProcessTask {
   id?: number
+  name?: string
   taskCode?: string
   taskName?: string
   inputDir?: string
@@ -82,6 +96,7 @@ export interface ProcessTask {
   executeType?: string
   cronExpression?: string
   status?: number
+  description?: string
   createTime?: string
 }
 
@@ -101,15 +116,21 @@ export interface ProcessExecution {
 // 存储清理规则
 export interface StorageCleanRule {
   id?: number
+  name?: string
   ruleName?: string
   targetDir?: string
+  storagePath?: string
   conditionType?: string
   conditionValue?: string
+  retentionDays?: number
+  maxStorageGb?: number
   executeType?: string
   cronExpression?: string
   afterAction?: string
   archiveDir?: string
   status?: number
+  enabled?: boolean
+  description?: string
   remark?: string
 }
 
@@ -119,6 +140,8 @@ export interface StorageOverview {
   usedSize?: number
   freeSize?: number
   usageRate?: number
+  usagePercent?: number
+  totalFiles?: number
   fileCount?: number
   dirCount?: number
 }

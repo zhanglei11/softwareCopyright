@@ -130,7 +130,7 @@ const handleDelete = async (id: number) => {
 }
 
 const toggleStatus = async (record: DatasourceConfig, enabled: boolean) => {
-  await updateDatasourceStatus(record.id!, enabled)
+  await updateDatasourceStatus(record.id!, enabled ? 1 : 0)
   record.enabled = enabled
 }
 

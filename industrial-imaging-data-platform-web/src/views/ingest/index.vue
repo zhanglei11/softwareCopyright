@@ -113,7 +113,7 @@ const taskColumns = [
 const loadTasks = async () => {
   taskLoading.value = true
   try {
-    const res = await getIngestTaskList({ ...taskQuery, pageNum: taskPagination.current, pageSize: taskPagination.pageSize })
+    const res = await getIngestTaskList({ ...taskQuery, pageNum: taskPagination.current, pageSize: taskPagination.pageSize } as Record<string, unknown>)
     tasks.value = res.data.rows
     taskPagination.total = res.data.total
   } finally { taskLoading.value = false }
@@ -125,7 +125,7 @@ const saveTask = async () => {
   await taskFormRef.value?.validate()
   taskSaving.value = true
   try {
-    if (taskForm.id) await updateIngestTask(taskForm as IngestTask)
+    if (taskForm.id) await updateIngestTask(taskForm.id, taskForm as IngestTask)
     else await addIngestTask(taskForm as IngestTask)
     message.success('保存成功'); taskModalVisible.value = false; loadTasks()
   } finally { taskSaving.value = false }
