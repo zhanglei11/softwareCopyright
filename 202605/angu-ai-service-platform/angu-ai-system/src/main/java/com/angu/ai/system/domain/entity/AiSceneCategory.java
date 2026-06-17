@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @Schema(description = "AI 场景分类")
 public class AiSceneCategory extends BaseEntity {
 
-    @Schema(description = "分类名称")
+    @Schema(description = "分类名称111")
     private String name;
 
     @Schema(description = "图标")
