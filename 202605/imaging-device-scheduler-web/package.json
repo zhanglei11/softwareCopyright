@@ -33,12 +33,5 @@
     "typescript": "~5.9.3",
     "vite": "^7.0.0",
     "vue-tsc": "^3.1.4"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "core-js",
-      "@parcel/watcher"
-    ]
   }
 }
